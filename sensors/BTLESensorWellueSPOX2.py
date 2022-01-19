@@ -129,14 +129,14 @@ class BTSensorWellueSPOX():
             self.state = self.STATE_CONNECTING
             print('{} Entering into connecting state'.format(self.device_name))
         else:
-            print('{} ERROR:: Cannot enter into connecting state - existing state is {}'.format(self.device_name), self.state)
+            print('{} ERROR:: Cannot enter into connecting state - existing state is {}'.format(self.device_name, self.state))
 
     def stop_reading(self):
         if self.state in [self.STATE_CONNECTING, self.STATE_READING]:
             self.state = self.STATE_DORMANT
             print('{} Entering into dormant state'.format(self.device_name))
         else:
-            print('{} ERROR:: Cannot enter into dormant state - existing state is {}'.format(self.device_name), self.state)
+            print('{} ERROR:: Cannot enter into dormant state - existing state is {}'.format(self.device_name, self.state))
 
     def get_results(self):
         return self.results_dict

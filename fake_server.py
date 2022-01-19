@@ -124,7 +124,7 @@ def terminate():
 
 
 
-scanner = BTLEScanner(service_name='bt_scan', uiCallback=None, emulation_mode=False)
+scanner = BTLEScanner(service_name='bt_scan', uiCallback=None, emulation_mode=False, verbose=False)
 
 t_scanner = Thread(target=scanner.scan, args=())
 t_scanner.start()
