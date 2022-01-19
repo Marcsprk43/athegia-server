@@ -246,9 +246,7 @@ class BTSensorWellueSPOX():
 
 
     def reset_variables(self):
-        self.good_readings = 0
-        self.number_readings = 0
-
+        self.init_results_dict()
         self.init_ring_buffer(300)
 
 
@@ -279,6 +277,7 @@ class BTSensorWellueSPOX():
 
                 result, msg = await self.get_readings(self.device_service_number, 
                                                         callback=None, num_readings=7)
+                self.results_dict['message'] = msg
                 if result == 1:
                     print('{}:: Successfully completed readings'.format(self.device_name))
                     self.state = self.STATE_DORMANT

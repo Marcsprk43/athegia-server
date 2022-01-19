@@ -6,11 +6,9 @@ import asyncio
 from threading import Thread
 import json
 
-from sensors.BTLESensorWellueSPOX2 import BTSensorWellueSPOX
+from sensors.BTLESensorDummy import BTSensorDummy
 
 app = Flask(__name__)
-
-
 
 
 DORMANT = 0
@@ -132,9 +130,18 @@ t_scanner = Thread(target=scanner.scan, args=())
 t_scanner.start()
 print('Started scanning Thread.............')
 
-s1 = BTSensorWellueSPOX(device_name='VTM 20F', device_id=0,
+sensor1_config = {
+    'find_delay' : 5,
+    'connect_delay' : 7,
+    'read_delay' : 10,
+    'read_complete_delay' : 17,
+    'disconnect_delay': 19 }
+
+
+s1 = BTSensorDummy(device_name='VTM 20F', device_id=0,
                                 scanner_instance=scanner, 
-                                emulation_mode=False)
+                                emulation_mode=False,
+                                config=sensor1_config)
 
 s2 = Sensor('test2',connect_delay=4, notify_delay=2)
 
