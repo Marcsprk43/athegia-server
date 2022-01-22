@@ -90,16 +90,17 @@ def start_scan():
     print('waiting to start thread in 2 seconds')
     import time
     time.sleep(2)
-    s1.start_reading()
-    s2.start_reading()
+    for sensor in sensor_list:
+        print('Starting sensor {}'.format(sensor))
+        sensor.start_reading()
     
     return "<p>scanning......</p>"
 
 @app.route("/stop_scan")
 def stop_scan():
     print('stopping ')
-    s1.stop_reading()
-    s2.stop_reading()
+    for sensor in sensor_list:
+        sensor.stop_reading()
 
     return "<p>stopping......</p>"
 
@@ -124,7 +125,7 @@ def terminate():
 
 
 
-scanner = BTLEScanner(service_name='bt_scan', uiCallback=None, emulation_mode=False, verbose=False)
+scanner = BTLEScanner(service_name='bt_scan', uiCallback=None, verbose=False)
 
 t_scanner = Thread(target=scanner.scan, args=())
 t_scanner.start()
@@ -137,15 +138,24 @@ sensor1_config = {
     'read_complete_delay' : 17,
     'disconnect_delay': 19 }
 
+sensor2_config = {
+    'find_delay' : 20,
+    'connect_delay' : 22,
+    'read_delay' : 25,
+    'read_complete_delay' : 32,
+    'disconnect_delay': 34 }
+
 
 s1 = BTSensorDummy(device_name='VTM 20F', device_id=0,
                                 scanner_instance=scanner, 
                                 emulation_mode=False,
                                 config=sensor1_config)
 
-s2 = Sensor('test2',connect_delay=4, notify_delay=2)
-
-sensor_list = [s1]
+s2 = BTSensorDummy(device_name='VTM 21F', device_id=1,
+                                scanner_instance=scanner, 
+                                emulation_mode=False,
+                                config=sensor2_config)
+sensor_list = [s1,s2]
 
 device_list = [{'name':'SPO2', 'address':'1223456789'},{'name':'BP', 'address':'aaaaaaaaaaaaaa'}]
 

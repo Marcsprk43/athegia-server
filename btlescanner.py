@@ -77,13 +77,13 @@ class BTLEScanner():
     new_scan = False      # flag to indicate new scan has completed
     devices = []
     running = False
-    verbose=True
+    verbose=False
      
     # this is the results dict that is passed back in the guiCallback
     ui_callback_dict = {}
 
     def __init__(self, service_name=None, uiCallback=None, 
-                       emulation_mode=False, verbose=True):
+                       emulation_mode=False, verbose=False):
         """
         Constructor function that initializes the object variables.
         
@@ -153,8 +153,9 @@ class BTLEScanner():
 
             # Unpack the Bleak.devices object into a list of Bleak.device
             if devices:
+                print('scanner:: Device Log - {} devices found'.format(len(devices)))
                 for d in devices:
-                    if (not self.emulation_mode) and self.verbose:
+                    if self.verbose:
                         print(d, d.rssi)   # print the RSSI to the console for fun
                     device_list.append(d)
                 
