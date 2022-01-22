@@ -8,7 +8,7 @@ import json
 
 from sensors.BTLESensorDummy import BTSensorDummy
 
-app = Flask(__name__)
+app = Flask(__name__) 
 
 
 DORMANT = 0
@@ -125,11 +125,8 @@ def terminate():
 
 
 
-<<<<<<< HEAD
 scanner = BTLEScanner(service_name='bt_scan', uiCallback=None, verbose=False)
-=======
-#scanner = BTLEScanner(service_name='bt_scan', uiCallback=None, emulation_mode=False, verbose=False)
->>>>>>> 8f9a970c5336996501f1a436d7c643797b7c7c43
+
 
 #t_scanner = Thread(target=scanner.scan, args=())
 #t_scanner.start()
