@@ -125,10 +125,14 @@ def terminate():
 
 
 
+<<<<<<< HEAD
 scanner = BTLEScanner(service_name='bt_scan', uiCallback=None, verbose=False)
+=======
+#scanner = BTLEScanner(service_name='bt_scan', uiCallback=None, emulation_mode=False, verbose=False)
+>>>>>>> 8f9a970c5336996501f1a436d7c643797b7c7c43
 
-t_scanner = Thread(target=scanner.scan, args=())
-t_scanner.start()
+#t_scanner = Thread(target=scanner.scan, args=())
+#t_scanner.start()
 print('Started scanning Thread.............')
 
 sensor1_config = {
@@ -147,7 +151,7 @@ sensor2_config = {
 
 
 s1 = BTSensorDummy(device_name='VTM 20F', device_id=0,
-                                scanner_instance=scanner, 
+                                scanner_instance="fakeScanner", 
                                 emulation_mode=False,
                                 config=sensor1_config)
 
@@ -174,5 +178,5 @@ t = Thread(target =run_function, args =())
 t.start()
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5002)
     print('serving on port 5000')
