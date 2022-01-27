@@ -107,9 +107,11 @@ def stop_scan():
 @app.route("/get_data")
 def get_data():
     print('in get_status')
-    return_string = ''
+    return_list = []
     for sensor in sensor_list:
-        return_string += json.dumps(sensor.get_results(), indent=4)
+        return_list.append(sensor.get_results())
+
+    return_string = json.dumps(return_list, indent=4)
     
     return return_string
 
