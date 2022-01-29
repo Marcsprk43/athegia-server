@@ -19,7 +19,7 @@ sensor1 = BTSensorTemp(device_addr='A8:1B:6A:A8:EC:18', device_id=2,
                                 scanner_instance=s, 
                                 reading_timeout=60)
 
-asyncio.run( sensor1.loop())
+asyncio.run( sensor1.loop(initial_state=1))
 
 print('SPO2 {}'.format(sensor1.spo2))
 
