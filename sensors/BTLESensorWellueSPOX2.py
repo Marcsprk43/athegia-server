@@ -228,7 +228,7 @@ class BTSensorWellueSPOX():
                                                             self.found_device.addr))
 
                 if self.client:
-                    self.client.disconnect()
+                    await self.client.disconnect()
 
                 self.client = False
 
@@ -245,7 +245,7 @@ class BTSensorWellueSPOX():
             except Exception as e:
                 print('{}:: ERROR could not connect to btle client'.format(self.device_name,
                                                                     self.client))
-                self.client.disconnect()
+                await self.client.disconnect()
                 self.results_dict['connected'] = False
                 await asyncio.sleep(1)
                 self.client = False
