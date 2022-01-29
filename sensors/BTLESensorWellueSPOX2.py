@@ -67,6 +67,7 @@ class BTSensorWellueSPOX():
         emulation_mode(boolean): run in emulation mode if true
         """
 
+        print('{}:: Initializing instance of BTSensorWellueSPOX')
         # First check that required parameters are present
         if (((not device_name == None) or (not device_addr == None))
                 and (not device_id)

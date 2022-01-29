@@ -67,6 +67,7 @@ class BTSensorLibelliumBP():
         emulation_mode(boolean): run in emulation mode if true
         """
 
+        print('{}:: Initializing instance of BTSensorLibelliumBP')
         # First check that required parameters are present
         if (((not device_name == None) or (not device_addr == None))
                 and (not device_id)
@@ -83,7 +84,11 @@ class BTSensorLibelliumBP():
             self.init_results_dict()
 
         else:
-            print("Error no device name specified")
+            print("{}:: Error no device name specified".format(device_name))
+            print('device_name: {}'.format(device_name))
+            print('device_addr: {}'.format(device_addr))
+            print('device_id  : {}'.format(device_id))
+            print('scanner_instance: {}'.format(scanner_instance))
 
     def reset_variables(self):
         """Method to reset variables and ring buffer"""
