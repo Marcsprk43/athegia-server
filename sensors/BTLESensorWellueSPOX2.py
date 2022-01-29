@@ -266,7 +266,7 @@ class BTSensorWellueSPOX():
             elif self.state == self.STATE_CONNECTING:
 
                 if not await self.connect():
-                    pass    # no device found - back off for 0.5 sec
+                    await asyncio.sleep(0.2)    # no device found - back off for 0.5 sec
                 else:                           # a device was found and connected
                     print('{}:: device found and connected'.format(self.device_name))
                     print('{}:: entering READ state.....'.format(self.device_name))

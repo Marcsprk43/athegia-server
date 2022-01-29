@@ -17,59 +17,6 @@ DORMANT = 0
 CONNECTING = 1
 READ = 2
 EXIT = 3
-
-class Sensor():
-    # static class variables
-    
-    def __init__(self, name, connect_delay=1, notify_delay=1):
-        self.name = name
-        self.exit = False
-        self.state = DORMANT
-        self.connect_delay = connect_delay
-        self.notify_delay = notify_delay        
-        self.return_value_count = 0
-        
-    def start_reading(self):
-        self.state = CONNECTING
-        
-    def stop_reading(self):
-        self.state = DORMANT
-        
-    def terminate(self):
-        self.exit = True
-
-    async def loop(self):
-        while not self.exit:
-            
-            ## finite state machine
-            # connect
-            if self.state == CONNECTING:
-                print('{}:: not connected'.format(self.name))
-                print(get_device_list())
-                await asyncio.sleep(self.connect_delay)
-                self.state = READ
-                self.return_value_count = 0
-                print('{}:: connected'.format(self.name))
-            
-            # read
-            elif self.state == READ:
-                await asyncio.sleep(self.notify_delay)
-                self.return_value_count += 1
-                self.callback()
-                if self.return_value_count > 20:
-                    self.state = DORMANT
-
-            elif self.state == DORMANT:
-                await asyncio.sleep(0.5)
-            
-            else: 
-                await asyncio.sleep(0.5)
-        print('From Sensor:: Exiting {}'.format(self.name))        
-                
-                
-    def callback(self):
-        print('{}:: Callback - return_value_count_ {}'.format(self.name, self.return_value_count))
-        
                         
 @app.route("/")
 def hello_world():
@@ -89,11 +36,11 @@ def get_status():
 def start_scan():
     print('in scanner')
 
-    print('waiting to start thread in 2 seconds')
+    print('waiting to start scanning')
     import time
-    time.sleep(2)
-    s1.start_reading()
-    s2.start_reading()
+    time.sleep(.2)
+    for sensor in sensor_list:
+        sensor.start_reading()
     
     return "<p>scanning......</p>"
 
@@ -137,14 +84,12 @@ s1 = BTSensorWellueSPOX(device_name='VTM 20F', device_id=0,
                                 scanner_instance=scanner, 
                                 emulation_mode=False)
 
-s2 = Sensor('test2',connect_delay=4, notify_delay=2)
 
 sensor_list = [s1]
 
-device_list = [{'name':'SPO2', 'address':'1223456789'},{'name':'BP', 'address':'aaaaaaaaaaaaaa'}]
 
 def get_device_list():
-    return device_list
+    return sensor_list
 
 #asyncio.gather(s1.loop(), s2.loop())
 async def async_collection():
@@ -154,7 +99,7 @@ def run_function():
     asyncio.run(async_collection())
 
 #asyncio.run(async_collection())
-t = Thread(target =run_function, args =())
+t = Thread(target=run_function, args =())
 t.start()
 
 if __name__ == '__main__':
