@@ -8,7 +8,6 @@
 # https://drive.google.com/file/d/1-Vr0NEy-ypGBnR2Ukwu7-xShxoJlw1Do/view?usp=sharing
 
 import asyncio
-from app import CONNECTING
 import bleak
 import re
 import numpy as np
@@ -595,24 +594,24 @@ class BTSensorWellueSPOX():
                 print('{}({})[{:b}] '.format(hex(b), b, b), end='')
             
             # save the latest pulse and spo2 values to variables
-            self.pulse = int(data[4])
-            self.spo2 = int(data[5])
+            pulse = int(data[4])
+            spo2 = int(data[5])
 
            
-            print('#### Pulse: {}  SPO2: {}'.format(self.pulse,self.spo2))
+            print('#### Pulse: {}  SPO2: {}'.format(pulse,spo2))
 
 
             # simple tests to ensure the readings are "good"
-            if self.pulse > 20 and self.pulse <110:
-                if self.spo2 > 50 and self.spo2 <=100:
+            if pulse > 20 and pulse <110:
+                if spo2 > 50 and spo2 <=100:
                     self.good_readings += 1
                     print('\nGood readings: {} ({})'.format(self.good_readings, self.number_readings))
 
             print('\n')   
             # Update the device status dict
             self.results_dict['status'] = 'Reading'
-            self.results_dict['data']['spo2'] = self.spo2
-            self.results_dict['data']['pulse'] = self.pulse   
+            self.results_dict['data']['spo2'] = spo2
+            self.results_dict['data']['pulse'] = pulse   
             self.results_dict['data']['good_readings'] = self.good_readings
             self.results_dict['data']['total_readings'] = self.number_readings
         
