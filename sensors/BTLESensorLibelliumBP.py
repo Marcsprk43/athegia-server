@@ -56,7 +56,7 @@ class BTSensorLibelliumBP():
 
 
     def __init__(self, device_name=None, device_addr=None, device_id=None,
-                        scanner_instance=None, reading_timeout=30):
+                        scanner_instance=None, reading_timeout=40):
         """
         Constructor function that initializes the object variables.
         
@@ -328,10 +328,10 @@ class BTSensorLibelliumBP():
                 print('{}:: BTLE Client is disconnected'.format(self.device_name))
                 self.client = None
 
-            return self.client.is_connected
+            return self.client
         else:
             print('Client does not exist...')
-            return False
+            return None
 
 
     async def get_services(self):
