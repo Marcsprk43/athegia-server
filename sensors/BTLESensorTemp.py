@@ -431,7 +431,7 @@ class BTSensorTemp():
         try:
             await self.client.start_notify(service_num, cb)
         except Exception as e:
-            print('{}:: ERROR with client.start_noitify service_num={} callback={}'
+            print('{}:: ERROR with client.start_notify service_num={} callback={}'
                         .format(self.device_name, service_num, cb))
         else:
         
