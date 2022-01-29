@@ -18,7 +18,7 @@ print('starting the sensor')
 sensor1 = BTSensorLibelliumBP(device_name='BP01', device_id=1,
                                 scanner_instance=s)
 time.sleep(1)
-asyncio.run( sensor1.loop())
+asyncio.run( sensor1.loop(initial_state=1))
 
 print('SPO2 {}'.format(sensor1.spo2))
 

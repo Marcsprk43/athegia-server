@@ -67,7 +67,7 @@ class BTSensorLibelliumBP():
         emulation_mode(boolean): run in emulation mode if true
         """
 
-        print('{}:: Initializing instance of BTSensorLibelliumBP')
+        print('{}:: Initializing instance of BTSensorLibelliumBP'.format(device_name))
         # First check that required parameters are present
         if (((not device_name == None) or (not device_addr == None))
                 and (not device_id == None)
