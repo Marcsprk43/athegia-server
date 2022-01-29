@@ -80,18 +80,16 @@ class BTSensorLibelliumBP():
             self.stop_reading_flag = False   # flag to interrupt the reading cycle
             self.reading_timeout_sec = reading_timeout  # the timeout of the reading cycle
 
-            if emulation_mode:
-                self.emulation_mode = True
-            else:
-                self.emulation_mode = False
-
             # set the status to initialized and send it back to the app
             self.init_results_dict()
-
 
         else:
             print("Error no device name specified")
 
+    def reset_variables(self):
+        """Method to reset variables and ring buffer"""
+        self.init_results_dict()
+        self.good_readings = 0
 
     def init_results_dict(self):
         """Simple method to reset and initialize the results_dict"""
@@ -120,6 +118,8 @@ class BTSensorLibelliumBP():
         status_dict['client'] = 'Connected' if self.client else 'None'
         status_dict['found_device'] = True if self.found_device else False
         status_dict['loop_counter'] = self.loop_counter
+        status_dict['state'] = self.state
+
         # status_dict[''] = 
 
         # Add more here 
@@ -128,24 +128,29 @@ class BTSensorLibelliumBP():
     
     def start_reading(self):
         if self.state == self.STATE_DORMANT:
-            self.state == self.STATE_CONNECTING
+            self.client = None
+            self.reset_variables()
+            self.state = self.STATE_CONNECTING
             print('{}:: Started reading cycle...'.format(self.device_name))
-
         else:
             print('{}:: Error cannot start reading from state {}'.format(self.device_name, self.state))
     
     def stop_reading(self):
         if self.state == self.STATE_CONNECTING:
             self.state = self.STATE_DORMANT
+            print('{} Entering into dormant state - existing state is {}'.format(self.device_name, self.state))
 
-        if self.state == self.STATE_READING:
+        elif self.state == self.STATE_READING:
             self.stop_reading_flag = True
+
+        else:
+            print('{} ERROR:: Cannot enter into dormant state - existing state is {}'.format(self.device_name, self.state))
 
     def get_results(self):
         return self.results_dict
 
 
-    def find_device(self, device_list, name):
+    def find_device(self, device_list, name=None, addr=None):
         """
         Look for and find a particular device in a list of Bleak.device objects.
         
@@ -161,18 +166,18 @@ class BTSensorLibelliumBP():
         # iterate over the devices and if the name matches append it to the found_device_list
         try:
             for device in device_list:
-                if self.emulation_mode:
-                    if re.search(name,device['name'], flags=re.IGNORECASE):
-                        found_device_list.append(device)
-                        # set the status to scanning and send it back to the app
-                        self.results_dict['status'] = 'Found....'
-                else:
-                    
+                if name:
                     if re.search(name,device.name, flags=re.IGNORECASE):
                         print('{}:: Found device with name: {}'.format(self.device_name, device.name))
                         found_device_list.append(device)
                         # set the status to scanning and send it back to the app
-                        self.results_dict['status'] = 'Found....'   
+                        self.results_dict['status'] = 'DeviceFound'   
+                else:
+                    if re.search(addr,device.address, flags=re.IGNORECASE):
+                        print('{}:: Found device with address: {}'.format(self.device_addr, device.address))
+                        found_device_list.append(device)
+                        # set the status to scanning and send it back to the app
+                        self.results_dict['status'] = 'DeviceFound'  
         except Exception as e:
             print('{}:: ERROR in find_device - device_list is probably invalid'.format(self.device_name))                 
 
@@ -191,7 +196,10 @@ class BTSensorLibelliumBP():
         # first check to see if the device was previously found
         if not self.found_device:
             device_list = self.scanner_instance.devices
-            found_device_list = self.find_device(device_list,self.device_name) # search for the device
+            if self.device_name:
+                found_device_list = self.find_device(device_list,name=self.device_name) # search for the device
+            else:
+                found_device_list = self.find_device(device_list,addr=self.device_addr) # search for the device
 
             if len(found_device_list) > 0:  # a device was found
                 print("{}:: Bluetooth devices found with name: {}".format(self.device_name,self.device_name))
@@ -210,52 +218,54 @@ class BTSensorLibelliumBP():
             # set the status to scanning and send it back to the app
             self.results_dict['status'] = 'Connecting....'
 
-            if not self.emulation_mode:
-                print('{}:: Connecting to device with address: {}'.format(self.device_name, 
-                                                                          self.found_device.address))
-                try:                                                          
-                    self.client = bleak.BleakClient(self.found_device.address)
-                except Exception as e:
-                    print('{}:: ERROR connecting to bleak.BleakClient-address: {}'.format(self.device_name, 
-                                                                self.found_device.addr))
-                    self.client = False
+            print('{}:: Connecting to device with address: {}'.format(self.device_name, 
+                                                                        self.found_device.address))
+            try:                                                          
+                self.client = bleak.BleakClient(self.found_device.address)
+            except Exception as e:
+                print('{}:: ERROR connecting to bleak.BleakClient-address: {}'.format(self.device_name, 
+                                                            self.found_device.addr))
 
-                    return False
-            else:
-                self.client = fakeClient(self.found_device['address'])
+                if self.client:
+                    await self.client.disconnect()
+
+                self.client = False
+
+                return False
            
         else:
             print('Using existing client')
 
         # Connect to the bluetooth device 
-        try:   
-            await self.client.connect()
-        except Exception as e:
-            print('{}:: ERROR could not connect to btle client'.format(self.device_name,
-                                                                self.client))
-            self.client = False
-            return False
+        if not self.client.is_connected:
+            try:   
+                await self.client.connect()
+            except Exception as e:
+                print('{}:: ERROR could not connect to btle client'.format(self.device_name,
+                                                                    self.client))
+                await self.client.disconnect()
+                self.results_dict['connected'] = False
+                await asyncio.sleep(1)
+                self.client = False
+                return False
 
-        if self.client.is_connected:
-            print('{}:: Successfully connected to btle client')
+            if self.client.is_connected:
+                print('{}:: Successfully connected to btle client')
+                # set the status to connected and send it back to the app
+                self.results_dict['status'] = 'Connected'
+                self.results_dict['connected'] = True
+                self.results_dict['completed'] = False
+        else:
+            print('{}:: Using existing connection to client'.format(self.device_name))
             # set the status to connected and send it back to the app
-            self.results_dict['status'] = 'Connected....'
+            self.results_dict['status'] = 'Connected'
             self.results_dict['connected'] = True
-            self.results_dict['finalized'] = False
+            self.results_dict['completed'] = False
         
         return self.client.is_connected
 
 
-
-
-    def reset_variables(self):
-        self.good_readings = 0
-        self.number_readings = 0
-
-        self.init_ring_buffer(300)
-
-
-    async def loop(self, initial_state=STATE_CONNECTING):
+    async def loop(self, initial_state=STATE_DORMANT):
         """The main loop method the implements the BTLE reader finite state machine.
         """
         self.state = initial_state
@@ -282,6 +292,7 @@ class BTSensorLibelliumBP():
 
                 result, msg = await self.get_readings(self.device_service_number, 
                                                         callback=None, num_readings=7)
+                self.results_dict['message'] = msg
                 if result == 1:
                     print('{}:: Successfully completed readings'.format(self.device_name))
                     self.state = self.STATE_DORMANT
@@ -296,10 +307,6 @@ class BTSensorLibelliumBP():
             else:
                 await asyncio.sleep(0.5)
 
-
-
-
-
     
     async def disconnect(self):
         """
@@ -312,9 +319,10 @@ class BTSensorLibelliumBP():
                 print('{}:: Client is connected....disconecting'.format(self.device_name))
                 await self.client.disconnect()
                 # set the status to connected and send it back to the app
-                self.results_dict['status'] = 'Disconnected....'
+                self.results_dict['status'] = 'Disconnected'
                 self.results_dict['connected'] = False
                 print('{}:: BTLE Client is disconnected'.format(self.device_name))
+                self.client = None
 
             return self.client.is_connected
         else:
@@ -371,7 +379,7 @@ class BTSensorLibelliumBP():
         await self.client.start_notify(service_num, cb)
 
         # set the status to connected and send it back to the app
-        self.results_dict['status'] = 'Reading....'
+        self.results_dict['status'] = 'Reading'
 
         return True
         
@@ -380,7 +388,7 @@ class BTSensorLibelliumBP():
         Method to disconnect from a notify service
         """
         await self.client.stop_notify(service_num)
-        self.results_dict['status'] = 'Connected....'
+        self.results_dict['status'] = 'Connected'
 
         return True
 
@@ -455,6 +463,7 @@ class BTSensorLibelliumBP():
             # Unsubscribe from notifications
             try:
                 await self.client.stop_notify(self.characterisitc_UUID)
+                await asyncio.sleep(1)
             except Exception as e:
                 print('{}:: ERROR failed in unsubscribe from notify'.format(self.device_name))
                 print(e)
@@ -469,13 +478,14 @@ class BTSensorLibelliumBP():
             
 
         try:
-            await self.client.disconnect()
-            
+            print('{}:: disconnecting from btle client'.format(self.device_name))
+            await self.disconnect()
+            await asyncio.sleep(1)
         except Exception as e:
                 print('{}:: ERROR failed in btle lient disconnect'.format(self.device_name))
                 print(e)
-
-        self.results_dict['connected'] = False
+        else:
+            self.results_dict['connected'] = False
 
         return return_code, return_msg
 
@@ -556,6 +566,8 @@ class BTSensorLibelliumBP():
         good_readings(int): the number of good readings received
         """
         time_stamp = np.datetime64(datetime.datetime.now(),'ms')
+
+        # first check what kind of message this is 
         if (data[0] == 0x67) and (data[1] == 0x2f):   # This is the result
             self.number_readings += 1
             print('{} - '.format(sender, data), end='')
@@ -577,5 +589,13 @@ class BTSensorLibelliumBP():
             print('Systolic:          {}'.format(self.systolic))
             print('Diastolic:         {}'.format(self.diastolic))
             print('Pulse:             {}'.format(self.pulse))
+
+            # Update the device status dict
+            self.results_dict['status'] = 'Reading'
+            self.results_dict['data']['systolic'] = self.systolic
+            self.results_dict['data']['diastolic'] = self.diastolic            
+            self.results_dict['data']['pulse'] = self.pulse   
+            self.results_dict['data']['good_readings'] = self.good_readings
+            self.results_dict['data']['total_readings'] = self.number_readings
                                     
 

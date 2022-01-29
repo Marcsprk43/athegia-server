@@ -56,7 +56,7 @@ class BTSensorWellueSPOX():
 
 
     def __init__(self, device_name=None, device_addr=None, device_id=None,
-                        scanner_instance=None, reading_timeout=10,
+                        scanner_instance=None, reading_timeout=20,
                         emulation_mode=False):
         """
         Constructor function that initializes the object variables.
@@ -113,7 +113,6 @@ class BTSensorWellueSPOX():
 
     def get_status(self):
         status_dict = {}
-        status_dict['device_name'] = self.results_dict['device_id']
         status_dict['scanner_instance'] = ('{}'.format(self.scanner_instance) 
                                             if self.scanner_instance
                                             else 'None')
@@ -134,16 +133,19 @@ class BTSensorWellueSPOX():
         if self.state == self.STATE_DORMANT:
             self.client = None
             self.reset_variables()
-
             self.state = self.STATE_CONNECTING
             print('{} Entering into connecting state'.format(self.device_name))
         else:
             print('{} ERROR:: Cannot enter into connecting state - existing state is {}'.format(self.device_name, self.state))
 
     def stop_reading(self):
-        if self.state in [self.STATE_CONNECTING, self.STATE_READING]:
+        if self.state == self.STATE_CONNECTING:
             self.state = self.STATE_DORMANT
-            print('{} Entering into dormant state'.format(self.device_name))
+            print('{} Entering into dormant state - existing state is {}'.format(self.device_name, self.state))
+
+        elif self.state == self.STATE_READING:
+            self.stop_reading_flag = True
+
         else:
             print('{} ERROR:: Cannot enter into dormant state - existing state is {}'.format(self.device_name, self.state))
 
@@ -307,15 +309,10 @@ class BTSensorWellueSPOX():
                     print('{}:: Problem with readings: {}'.format(self.device_name, msg))
                     self.state = self.STATE_DORMANT
                 
-                
-
             else:
                 await asyncio.sleep(0.5)
 
-
-
-
-    
+   
     async def disconnect(self):
         """
         Method to disconnect from a bluetooth client
@@ -422,7 +419,7 @@ class BTSensorWellueSPOX():
 
         """
 
-        return_code = False  # return code to track errors
+        return_code = 0  # return code to track errors
         return_msg = 'None'
 
         # If there is no callback function specified use default_callback
