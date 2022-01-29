@@ -405,7 +405,7 @@ class BTSensorLibelliumBP():
         return False
 
 
-    async def get_readings(self, service_num, callback=None, num_readings=7):
+    async def get_readings(self, service_num, callback=None, num_readings=1):
         """
         Method to get a specified number of 'good' readings from an asyncronous bluetooth notify service. 
         
