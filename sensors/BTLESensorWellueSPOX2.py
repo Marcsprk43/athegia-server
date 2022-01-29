@@ -91,6 +91,7 @@ class BTSensorWellueSPOX():
         """Method to reset variables and ring buffer"""
         self.init_results_dict()
         self.init_ring_buffer(300)
+        self.good_readings = 0
 
 
     def init_results_dict(self):
@@ -233,21 +234,24 @@ class BTSensorWellueSPOX():
         else:
             print('Using existing client')
 
-        # Connect to the bluetooth device 
-        try:   
-            await self.client.connect()
-        except Exception as e:
-            print('{}:: ERROR could not connect to btle client'.format(self.device_name,
-                                                                self.client))
-            self.client = False
-            return False
+        # Connect to the bluetooth device
+        if not self.client.is_connected():
+            try:   
+                await self.client.connect()
+            except Exception as e:
+                print('{}:: ERROR could not connect to btle client'.format(self.device_name,
+                                                                    self.client))
+                self.client = False
+                return False
 
-        if self.client.is_connected:
-            print('{}:: Successfully connected to btle client')
-            # set the status to connected and send it back to the app
-            self.results_dict['status'] = 'Connected'
-            self.results_dict['connected'] = True
-            self.results_dict['completed'] = False
+            if self.client.is_connected:
+                print('{}:: Successfully connected to btle client')
+                # set the status to connected and send it back to the app
+                self.results_dict['status'] = 'Connected'
+                self.results_dict['connected'] = True
+                self.results_dict['completed'] = False
+        else:
+            print('{}:: Using existing connection to client'.format(self.device_name))
         
         return self.client.is_connected
 
