@@ -87,6 +87,12 @@ class BTSensorWellueSPOX():
         else:
             print("Error no device name specified")
 
+    def reset_variables(self):
+        """Method to reset variables and ring buffer"""
+        self.init_results_dict()
+        self.init_ring_buffer(300)
+
+
     def init_results_dict(self):
         """Simple method to reset and initialize the results_dict"""
         self.results_dict = {}
@@ -126,6 +132,9 @@ class BTSensorWellueSPOX():
 
     def start_reading(self):
         if self.state == self.STATE_DORMANT:
+            self.client = None
+            self.reset_variables()
+
             self.state = self.STATE_CONNECTING
             print('{} Entering into connecting state'.format(self.device_name))
         else:
@@ -162,13 +171,13 @@ class BTSensorWellueSPOX():
                         print('{}:: Found device with name: {}'.format(self.device_name, device.name))
                         found_device_list.append(device)
                         # set the status to scanning and send it back to the app
-                        self.results_dict['status'] = 'Found....'   
+                        self.results_dict['status'] = 'DeviceFound'   
                 else:
                     if re.search(addr,device.address, flags=re.IGNORECASE):
                         print('{}:: Found device with address: {}'.format(self.device_addr, device.address))
                         found_device_list.append(device)
                         # set the status to scanning and send it back to the app
-                        self.results_dict['status'] = 'Found....'  
+                        self.results_dict['status'] = 'DeviceFound'  
         except Exception as e:
             print('{}:: ERROR in find_device - device_list is probably invalid'.format(self.device_name))                 
 
@@ -207,7 +216,7 @@ class BTSensorWellueSPOX():
             print('Creating BTLE client....')
 
             # set the status to scanning and send it back to the app
-            self.results_dict['status'] = 'Connecting....'
+            self.results_dict['status'] = 'Connecting'
 
             print('{}:: Connecting to device with address: {}'.format(self.device_name, 
                                                                         self.found_device.address))
@@ -236,18 +245,13 @@ class BTSensorWellueSPOX():
         if self.client.is_connected:
             print('{}:: Successfully connected to btle client')
             # set the status to connected and send it back to the app
-            self.results_dict['status'] = 'Connected....'
+            self.results_dict['status'] = 'Connected'
             self.results_dict['connected'] = True
             self.results_dict['completed'] = False
         
         return self.client.is_connected
 
 
-
-
-    def reset_variables(self):
-        self.init_results_dict()
-        self.init_ring_buffer(300)
 
 
     async def loop(self, initial_state=STATE_DORMANT):
@@ -309,7 +313,7 @@ class BTSensorWellueSPOX():
                 print('{}:: Client is connected....disconecting'.format(self.device_name))
                 await self.client.disconnect()
                 # set the status to connected and send it back to the app
-                self.results_dict['status'] = 'Disconnected....'
+                self.results_dict['status'] = 'Disconnected'
                 self.results_dict['connected'] = False
                 print('{}:: BTLE Client is disconnected'.format(self.device_name))
 
@@ -368,7 +372,7 @@ class BTSensorWellueSPOX():
         await self.client.start_notify(service_num, cb)
 
         # set the status to connected and send it back to the app
-        self.results_dict['status'] = 'Reading....'
+        self.results_dict['status'] = 'Reading'
 
         return True
         
@@ -377,7 +381,7 @@ class BTSensorWellueSPOX():
         Method to disconnect from a notify service
         """
         await self.client.stop_notify(service_num)
-        self.results_dict['status'] = 'Connected....'
+        self.results_dict['status'] = 'Connected'
 
         return True
 
@@ -588,7 +592,7 @@ class BTSensorWellueSPOX():
 
             print('\n')   
             # Update the device status dict
-            self.results_dict['status'] = 'Reading....'
+            self.results_dict['status'] = 'Reading'
             self.results_dict['data']['spo2'] = self.spo2
             self.results_dict['data']['pulse'] = self.pulse   
             self.results_dict['data']['good_readings'] = self.good_readings
