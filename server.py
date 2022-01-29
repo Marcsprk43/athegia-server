@@ -7,6 +7,7 @@ from threading import Thread
 import json
 
 from sensors.BTLESensorWellueSPOX2 import BTSensorWellueSPOX
+from sensors.BTLESensorLibelliumBP import BTSensorLibelliumBP
 
 app = Flask(__name__)
 
@@ -83,8 +84,11 @@ print('Started scanning Thread.............')
 s1 = BTSensorWellueSPOX(device_name='VTM 20F', device_id=0,
                                 scanner_instance=scanner)
 
+s2 = BTSensorLibelliumBP(device_name='BP01', device_id=1,
+                                scanner_instance=scanner)
 
-sensor_list = [s1]
+
+sensor_list = [s1, s2]
 
 
 def get_device_list():
@@ -92,7 +96,7 @@ def get_device_list():
 
 #asyncio.gather(s1.loop(), s2.loop())
 async def async_collection():
-    await asyncio.gather(s1.loop())# , s2.loop())
+    await asyncio.gather(s1.loop() , s2.loop())
 
 def run_function():
     asyncio.run(async_collection())
