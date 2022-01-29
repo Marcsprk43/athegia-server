@@ -579,7 +579,7 @@ class BTSensorTemp():
 
             
             # Calculations based on mySignals code
-            temp = (data[2]*256+data[1])/100           
+            temp = (data[2]*256+data[1]+51)/100          
             
             if temp > 30 and temp < 44:
                 self.good_readings += 1
