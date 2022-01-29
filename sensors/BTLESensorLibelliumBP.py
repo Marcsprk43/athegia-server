@@ -116,7 +116,7 @@ class BTSensorLibelliumBP():
     def get_status(self):
         status_dict = {}
         status_dict['scanner_instance'] = ('{}'.format(self.scanner_instance) 
-                                            if self.scanner_instace
+                                            if self.scanner_instance
                                             else 'None')
         status_dict['device_name'] = self.device_name
         status_dict['client'] = 'Connected' if self.client else 'None'
