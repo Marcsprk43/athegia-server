@@ -34,10 +34,6 @@ class BTSensorWellueSPOX():
 
     loop_counter = 0
     
-    # Key device measurements
-    spo2 = None
-    pulse = None
-    
     # Ring buffer - this holds the readings for pleth that streams in at about 30Hz
     buff_timestamp = None
     buff_value = None
