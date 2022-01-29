@@ -475,7 +475,8 @@ class BTSensorWellueSPOX():
 
 
         try:
-            await self.client.disconnect()
+            print('{}:: disconnecting from btle client'.format(self.device_name))
+            await self.disconnect()
         except Exception as e:
                 print('{}:: ERROR failed in btle lient disconnect'.format(self.device_name))
                 print(e)
