@@ -13,106 +13,6 @@ import re
 import numpy as np
 import datetime
 
-
-#nest_asyncio.apply()
-
-####### ToDo #########
-# 1. In the unlikely event that two BTLE devices with the same name is in the vincinty implement a pairing concept
-#    using UUID identifier
-
-class fakeClient():
-    """
-    This is a test class that emulates a real bluetooth device used for testing. The emulated device is a
-    Wellue SPOX sensor. Only the SPO2 and Pulse readings are emulated.
-    
-    Parameters:
-    None
-    
-    Returns:
-    None"""
-
-    initialized = False
-    address = None
-    is_connected = False
-    notify = False
-    # This is the fake data that will be passed to the calling object
-    data = [bytearray.fromhex('fe0a5500456026eb081d'),
-            bytearray.fromhex('fe0a55004760287702a7'),
-            bytearray.fromhex('fe0a5500456026eb081d'),
-            bytearray.fromhex('fe0a55004760287702a7'),
-            bytearray.fromhex('fe0a5500456026eb081d'),
-            bytearray.fromhex('fe0a55004760287702a7')
-           ]
-    
-    def __init__(self, address):
-        """Object initialization method.
-        
-        Parameters:
-        address: the MAC address or the UUID of the bluetooth device - not used in emulation
-        
-        Returns:
-        None"""
-        self.initialized = True
-        self.address = address
-        print("fakeClient :: initialized to address {}".format(self.address))
-        
-        
-    async def connect(self):
-        """
-        Connect to the emulator.
-        
-        Parameters:
-        None
-        """
-        print('fakeClient :: connecting.....')
-        await asyncio.sleep(1)
-        self.is_connected = True
-
-    async def disconnect(self):
-        """
-        Disconnect from the emulator.
-        
-        Parameters:
-        None
-        """
-        print('fakeClient :: disconnecting.....')
-        await asyncio.sleep(1)
-        self.is_connected = False
-                
-    async def start_notify(self,service_num, cb):
-        """
-        Emulation of the bleak bluetooth start_notify command. It will send back 7 readings
-        before terminating
-        
-        Parameters:
-        service_num(int): the service on the bluetooth device to connect to
-        cb(function): the callback function that bluetooth packets are forwarded to"""
-        
-        self.notify = True
-        count = 0
-        
-        good_readings = 0 # Counter for the number of readings returned
-        while good_readings<7:
-            print('fakeClient :: starting notify')
-
-            # send data to callback
-            print('fakeClient :: sending - {}'.format(self.data[count]))
-            good_readings = cb('fakeClient', self.data[count] )
-            
-            count += 1
-            if count > 3:
-                count = 0
-                
-            print('fakeClient :: sleeping - notify {}'.format(self.notify))
- 
-            await asyncio.sleep(1)
-    
-        print('fakeClient :: stopping notify')
-            
-    async def stop_notify(self, service_num):
-        print('fakeClient :: stopping notify')
-        self.notify = False
-        
         
 class BTSensorLibelliumBP():
     """
@@ -123,7 +23,7 @@ class BTSensorLibelliumBP():
 
     # Global class variables
     scanner_instance = None
-    device_name = ''
+    device_name = None
     #device_service_number = 26   # This is from the reverse engineering
     characterisitc_UUID = '0000ffe1-0000-1000-8000-00805f9b34fb'
     client = None
@@ -133,7 +33,6 @@ class BTSensorLibelliumBP():
     number_readings = 0
 
     loop_counter = 0
-
     
     # Ring buffer - this holds the readings for pleth that streams in at about 30Hz
     buff_timestamp = None
@@ -148,13 +47,13 @@ class BTSensorLibelliumBP():
     STATE_READING = 2
 
     force_exit_flag = False
+
     # This is the main loop state variable
     state = STATE_DORMANT  # main state variable - initialize to DORMANT
    
     # this is the results dict that the flask server has access to
     results_dict = {}
 
-  
 
     def __init__(self, device_name=None, device_addr=None, device_id=None,
                         scanner_instance=None, reading_timeout=30,

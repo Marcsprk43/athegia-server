@@ -45,12 +45,15 @@ class BTSensorWellueSPOX():
     STATE_DORMANT = 0
     STATE_CONNECTING = 1
     STATE_READING = 2
+
     force_exit_flag = False
 
-    state = STATE_DORMANT  # main state variable
+    # This is the main loop state variable
+    state = STATE_DORMANT  # main state variable - initialize to DORMANT
    
     # this is the results dict that the flask server has access to
     results_dict = {}
+
 
     def __init__(self, device_name=None, device_addr=None, device_id=None,
                         scanner_instance=None, reading_timeout=10,
@@ -67,6 +70,7 @@ class BTSensorWellueSPOX():
 
         # First check that required parameters are present
         if (((not device_name == None) or (not device_addr == None))
+                and (not device_id)
                 and (not scanner_instance == None)):
             self.device_name = device_name   # set the class variable device name
             self.init_ring_buffer(300)       # create the ring buffer for the pleth at 30Hz this is 10 seconds
