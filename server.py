@@ -8,6 +8,7 @@ import json
 
 from sensors.BTLESensorWellueSPOX2 import BTSensorWellueSPOX
 from sensors.BTLESensorLibelliumBP import BTSensorLibelliumBP
+from sensors.BTLESensorTemp import BTSensorTemp
 
 app = Flask(__name__)
 
@@ -87,8 +88,12 @@ s1 = BTSensorWellueSPOX(device_name='VTM 20F', device_id=0,
 s2 = BTSensorLibelliumBP(device_name='BP01', device_id=1,
                                 scanner_instance=scanner)
 
+s3 = BTSensorLibelliumBP(device_addr='A8:1B:6A:A8:EC:18', device_id=2,
+                                scanner_instance=scanner, 
+                                reading_timeout=40)
 
-sensor_list = [s1, s2]
+
+sensor_list = [s1, s2, s3]
 
 
 def get_device_list():
@@ -96,7 +101,7 @@ def get_device_list():
 
 #asyncio.gather(s1.loop(), s2.loop())
 async def async_collection():
-    await asyncio.gather(s1.loop() , s2.loop())
+    await asyncio.gather(s1.loop(), s2.loop(), s3.loop())
 
 def run_function():
     asyncio.run(async_collection())
