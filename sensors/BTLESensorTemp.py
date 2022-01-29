@@ -590,7 +590,8 @@ class BTSensorTemp():
 
             # Update the device status dict
             self.results_dict['status'] = 'Reading'
-            self.results_dict['data']['temp'] = temp   
+            self.results_dict['data']['temp_celcius'] = temp   
+            self.results_dict['data']['temp_farenheit'] = temp*1.8 +32   
             self.results_dict['timestamp'] = time_stamp
             self.results_dict['data']['good_readings'] = self.good_readings
             self.results_dict['data']['total_readings'] = self.number_readings
