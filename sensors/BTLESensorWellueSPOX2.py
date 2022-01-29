@@ -235,7 +235,7 @@ class BTSensorWellueSPOX():
             print('Using existing client')
 
         # Connect to the bluetooth device
-        if not self.client.is_connected():
+        if not self.client.is_connected:
             try:   
                 await self.client.connect()
             except Exception as e:
@@ -252,6 +252,10 @@ class BTSensorWellueSPOX():
                 self.results_dict['completed'] = False
         else:
             print('{}:: Using existing connection to client'.format(self.device_name))
+            # set the status to connected and send it back to the app
+            self.results_dict['status'] = 'Connected'
+            self.results_dict['connected'] = True
+            self.results_dict['completed'] = False
         
         return self.client.is_connected
 
