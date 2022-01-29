@@ -5,6 +5,7 @@ from btlescanner import BTLEScanner
 import asyncio
 from threading import Thread
 import json
+import datetime
 
 from sensors.BTLESensorWellueSPOX2 import BTSensorWellueSPOX
 from sensors.BTLESensorLibelliumBP import BTSensorLibelliumBP
@@ -12,6 +13,13 @@ from sensors.BTLESensorTemp import BTSensorTemp
 
 app = Flask(__name__)
 
+
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code"""
+
+    if isinstance(obj, (datetime.datetime, datetime.date)):
+        return obj.isoformat()
+    raise TypeError ("Type %s not serializable" % type(obj))
 
 
 
@@ -31,7 +39,7 @@ def get_status():
     for sensor in sensor_list:
         return_list.append(sensor.get_status())
         
-    return json.dumps(return_list)
+    return json.dumps(return_list, default=json_serial)
     
 
 @app.route("/start_scan")
@@ -61,7 +69,7 @@ def get_data():
     for sensor in sensor_list:
         return_list.append(sensor.get_results())
     
-    return json.dumps(return_list, indent=4)
+    return json.dumps(return_list, indent=4, default=json_serial)
 
 
 @app.route("/terminate")

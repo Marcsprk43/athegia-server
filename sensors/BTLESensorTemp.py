@@ -597,3 +597,4 @@ class BTSensorTemp():
             self.results_dict['data']['total_readings'] = self.number_readings
                                     
 
+
