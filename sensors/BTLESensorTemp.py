@@ -295,7 +295,7 @@ class BTSensorTemp():
             elif self.state == self.STATE_READING:
 
                 result, msg = await self.get_readings(self.device_service_number, 
-                                                        callback=None, num_readings=1)
+                                                        callback=None, num_readings=5)
                 self.results_dict['message'] = msg
                 if result == 1:
                     print('{}:: Successfully completed readings'.format(self.device_name))
