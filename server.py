@@ -20,7 +20,7 @@ EXIT = 3
                         
 @app.route("/")
 def hello_world():
-    return "<p>Hello, World!</p>\n<a href="http://10.0.0.110/get_status">Get Status</a>"
+    return "<p>Hello, World!</p>\\n<a href="http://10.0.0.110/get_status">Get Status</a>"
 
 @app.route("/get_status")
 def get_status():
