@@ -15,7 +15,7 @@ def callback(results_dict):
 
 time.sleep(1)
 print('starting the sensor')
-sensor1 = BTSensorLibelliumBP(device_name='BP01', device_id=1
+sensor1 = BTSensorLibelliumBP(device_name='BP01', device_id=1,
                                 scanner_instance=s, 
                                 emulation_mode=False)
 time.sleep(1)
