@@ -241,6 +241,8 @@ class BTSensorWellueSPOX():
             except Exception as e:
                 print('{}:: ERROR could not connect to btle client'.format(self.device_name,
                                                                     self.client))
+                self.client.disconnect()
+                await asyncio.sleep(1)
                 self.client = False
                 return False
 
@@ -273,12 +275,12 @@ class BTSensorWellueSPOX():
 
             # Idle
             if self.state == self.STATE_DORMANT:
-                await asyncio.sleep(0.1)  # sleep for 0.5 and hand back to event loop
+                await asyncio.sleep(0.5)  # sleep for 0.5 and hand back to event loop
 
             elif self.state == self.STATE_CONNECTING:
 
                 if not await self.connect():
-                    await asyncio.sleep(0.2)    # no device found - back off for 0.5 sec
+                    await asyncio.sleep(0.5)    # no device found - back off for 0.5 sec
                 else:                           # a device was found and connected
                     print('{}:: device found and connected'.format(self.device_name))
                     print('{}:: entering READ state.....'.format(self.device_name))
@@ -462,6 +464,7 @@ class BTSensorWellueSPOX():
             # Unsubscribe from notifications
             try:
                 await self.client.stop_notify(service_num)
+                await asyncio.sleep(1)
             except Exception as e:
                 print('{}:: ERROR failed in unsubscribe from notify'.format(self.device_name))
                 print(e)
@@ -473,10 +476,10 @@ class BTSensorWellueSPOX():
             self.results_dict['status'] = 'Failed'
             self.results_dict['finalized'] = False
 
-
         try:
             print('{}:: disconnecting from btle client'.format(self.device_name))
             await self.disconnect()
+            await asyncio.sleep(1)
         except Exception as e:
                 print('{}:: ERROR failed in btle lient disconnect'.format(self.device_name))
                 print(e)
