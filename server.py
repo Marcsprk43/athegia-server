@@ -78,12 +78,12 @@ def hello_world():
 @app.route("/get_status")
 def get_status():
     print('in get_status')
-    return_string = ''
+    return_list = []
     for sensor in sensor_list:
-        return_string += json.dumps(sensor.get_status())
+        return_list.append(sensor.get_status())
+        
+    return json.dumps(return_list)
     
-    return return_string
-
 
 @app.route("/start_scan")
 def start_scan():
@@ -107,12 +107,13 @@ def stop_scan():
 
 @app.route("/get_data")
 def get_data():
-    print('in get_status')
-    return_string = ''
+    print('in get_data')
+    return_list = []
     for sensor in sensor_list:
-        return_string += json.dumps(sensor.get_results(), indent=4)
+        return_list.append(sensor.get_results())
     
-    return return_string
+    return json.dumps(return_list, indent=4)
+
 
 @app.route("/terminate")
 def terminate():
