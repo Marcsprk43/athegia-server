@@ -294,7 +294,7 @@ class BTSensorLibelliumBP():
 
             elif self.state == self.STATE_READING:
 
-                result, msg = await self.get_readings(self.device_service_number, 
+                result, msg = await self.get_readings(self.characterisitc_UUID, 
                                                         callback=None, num_readings=7)
                 self.results_dict['message'] = msg
                 if result == 1:
