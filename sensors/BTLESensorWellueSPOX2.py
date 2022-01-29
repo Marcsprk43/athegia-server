@@ -226,6 +226,10 @@ class BTSensorWellueSPOX():
             except Exception as e:
                 print('{}:: ERROR connecting to bleak.BleakClient-address: {}'.format(self.device_name, 
                                                             self.found_device.addr))
+
+                if self.client:
+                    self.client.disconnect()
+
                 self.client = False
 
                 return False
@@ -242,6 +246,7 @@ class BTSensorWellueSPOX():
                 print('{}:: ERROR could not connect to btle client'.format(self.device_name,
                                                                     self.client))
                 self.client.disconnect()
+                self.results_dict['connected'] = False
                 await asyncio.sleep(1)
                 self.client = False
                 return False
@@ -326,6 +331,7 @@ class BTSensorWellueSPOX():
                 self.results_dict['status'] = 'Disconnected'
                 self.results_dict['connected'] = False
                 print('{}:: BTLE Client is disconnected'.format(self.device_name))
+                self.client = None
 
             return self.client.is_connected
         else:
