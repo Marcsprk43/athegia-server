@@ -67,10 +67,10 @@ class BTSensorWellueSPOX():
         emulation_mode(boolean): run in emulation mode if true
         """
 
-        print('{}:: Initializing instance of BTSensorWellueSPOX')
+        print('{}:: Initializing instance of BTSensorWellueSPOX'.format(device_name))
         # First check that required parameters are present
         if (((not device_name == None) or (not device_addr == None))
-                and (not device_id)
+                and (not device_id == None)
                 and (not scanner_instance == None)):
             self.device_name = device_name   # set the class variable device name
             self.init_ring_buffer(300)       # create the ring buffer for the pleth at 30Hz this is 10 seconds

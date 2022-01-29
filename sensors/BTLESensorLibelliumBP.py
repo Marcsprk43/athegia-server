@@ -70,7 +70,7 @@ class BTSensorLibelliumBP():
         print('{}:: Initializing instance of BTSensorLibelliumBP')
         # First check that required parameters are present
         if (((not device_name == None) or (not device_addr == None))
-                and (not device_id)
+                and (not device_id == None)
                 and (not scanner_instance == None)):
             self.device_name = device_name   # set the class variable device name
             self.device_addr = device_addr   # set the class variable device name
