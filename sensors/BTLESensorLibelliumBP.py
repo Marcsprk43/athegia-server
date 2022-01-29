@@ -56,8 +56,7 @@ class BTSensorLibelliumBP():
 
 
     def __init__(self, device_name=None, device_addr=None, device_id=None,
-                        scanner_instance=None, reading_timeout=30,
-                        emulation_mode=False):
+                        scanner_instance=None, reading_timeout=30):
         """
         Constructor function that initializes the object variables.
         

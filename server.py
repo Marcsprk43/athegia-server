@@ -81,8 +81,7 @@ t_scanner.start()
 print('Started scanning Thread.............')
 
 s1 = BTSensorWellueSPOX(device_name='VTM 20F', device_id=0,
-                                scanner_instance=scanner, 
-                                emulation_mode=False)
+                                scanner_instance=scanner)
 
 
 sensor_list = [s1]
