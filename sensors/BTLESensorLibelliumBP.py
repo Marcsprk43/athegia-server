@@ -264,7 +264,7 @@ class BTSensorLibelliumBP():
                 return False
 
             if self.client.is_connected:
-                print('{}:: Successfully connected to btle client')
+                print('{}:: Successfully connected to btle client'.format(self.device_name))
                 # set the status to connected and send it back to the app
                 self.results_dict['status'] = 'Connected'
                 self.results_dict['connected'] = True
