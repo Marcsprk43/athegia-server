@@ -110,6 +110,7 @@ class BTSensorLibelliumBP():
         self.results_dict['data']['systolic'] = 0
         self.results_dict['data']['diastolic'] = 0 
         self.results_dict['data']['pulse'] = 0 
+        self.results_dict['data']['timestamp'] = 0        
         self.results_dict['data']['good_readings'] = 0
         self.results_dict['data']['total_readings'] = 0
 
@@ -599,6 +600,7 @@ class BTSensorLibelliumBP():
             self.results_dict['data']['systolic'] = self.systolic
             self.results_dict['data']['diastolic'] = self.diastolic            
             self.results_dict['data']['pulse'] = self.pulse   
+            self.results_dict['data']['timestamp'] = datetime.datetime.now()  
             self.results_dict['data']['good_readings'] = self.good_readings
             self.results_dict['data']['total_readings'] = self.number_readings
                                     

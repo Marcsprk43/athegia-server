@@ -107,6 +107,7 @@ class BTSensorWellueSPOX():
         self.results_dict['data'] = {}
         self.results_dict['data']['spo2'] = 0
         self.results_dict['data']['pulse'] = 0 
+        self.results_dict['data']['timestamp'] = 0        
         self.results_dict['data']['good_readings'] = 0
         self.results_dict['data']['total_readings'] = 0
 
@@ -609,6 +610,7 @@ class BTSensorWellueSPOX():
             self.results_dict['status'] = 'Reading'
             self.results_dict['data']['spo2'] = spo2
             self.results_dict['data']['pulse'] = pulse   
+            self.results_dict['data']['timestamp'] = datetime.datetime.now()   
             self.results_dict['data']['good_readings'] = self.good_readings
             self.results_dict['data']['total_readings'] = self.number_readings
         
