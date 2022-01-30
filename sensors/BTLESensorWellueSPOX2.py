@@ -260,6 +260,7 @@ class BTSensorWellueSPOX():
         if not self.client.is_connected:
             try:   
                 await self.client.connect()
+                await asyncio.sleep(0.2)
             except Exception as e:
                 print('{}:: ERROR could not connect to btle client {}'.format(self.device_name, self.client))
                 print(e)
@@ -268,8 +269,7 @@ class BTSensorWellueSPOX():
                 await asyncio.sleep(1)
                 self.client = False
                 return False
-
-            if self.client.is_connected:
+            else:
                 print('{}:: Successfully connected to btle client'.format(self.device_name))
                 # set the status to connected and send it back to the app
                 self.results_dict['status'] = 'Connected'
