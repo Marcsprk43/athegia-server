@@ -262,8 +262,6 @@ class BTSensorDummy():
         self.init_results_dict()
         self.readings = 0
         
-
-
     async def loop(self, initial_state=STATE_DORMANT):
         """The main loop method the implements the BTLE reader finite state machine.
         """

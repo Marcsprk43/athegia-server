@@ -62,19 +62,19 @@ class BTSensorTemp():
         
         Parameters:
         btle_name(str): the name of the bluetooth device
-        device_addr(str): the bluetooth address or UUID of the bluetooth device
+        btle_addr(str): the bluetooth address or UUID of the bluetooth device
         scanner_instance(obj): a pointer to the btle scanner to access the list of devices
         emulation_mode(boolean): run in emulation mode if true
         """
 
-        print('{}:: Initializing instance of BTSensorTemp'.format(btle_name))
+        print('{}:: Initializing instance of BTSensorTemp'.format(device_name))
         # First check that required parameters are present
         if (((not btle_name == None) or (not btle_addr == None))
                 and (not device_name == None)
                 and (not device_id == None)
                 and (not scanner_instance == None)):
             self.btle_name = btle_name   # set the class variable device name
-            self.device_addr = btle_addr   # set the class variable device name
+            self.btle_addr = btle_addr   # set the class variable device name
             if device_name:
                 self.device_name = device_name
             else:
@@ -152,6 +152,8 @@ class BTSensorTemp():
             self.state = self.STATE_DORMANT
             print('{} Entering into dormant state - existing state is {}'.format(self.device_name, self.state))
 
+            self.found_device = False
+
         elif self.state == self.STATE_READING:
             self.stop_reading_flag = True
 
@@ -186,7 +188,7 @@ class BTSensorTemp():
                         self.results_dict['status'] = 'DeviceFound'   
                 else:
                     if re.search(addr,device.address, flags=re.IGNORECASE):
-                        print('{}:: Found device with address: {}'.format(self.device_addr, device.address))
+                        print('{}:: Found device with address: {}'.format(self.device_name, device.address))
                         found_device_list.append(device)
                         # set the status to scanning and send it back to the app
                         self.results_dict['status'] = 'DeviceFound'  
@@ -211,7 +213,7 @@ class BTSensorTemp():
             if self.btle_name:
                 found_device_list = self.find_device(device_list,name=self.btle_name) # search for the device
             else:
-                found_device_list = self.find_device(device_list,addr=self.device_addr) # search for the device
+                found_device_list = self.find_device(device_list,addr=self.btle_addr) # search for the device
 
             if len(found_device_list) > 0:  # a device was found
                 print("{}:: Bluetooth devices found with name: {}".format(self.device_name,self.btle_name))
@@ -228,7 +230,7 @@ class BTSensorTemp():
             print('Creating BTLE client....')
 
             # set the status to scanning and send it back to the app
-            self.results_dict['status'] = 'Connecting....'
+            self.results_dict['status'] = 'Connecting'
 
             print('{}:: Connecting to device with address: {}'.format(self.device_name, 
                                                                         self.found_device.address))
@@ -254,8 +256,7 @@ class BTSensorTemp():
             try:   
                 await self.client.connect()
             except Exception as e:
-                print('{}:: ERROR could not connect to btle client {}'.format(self.device_name,
-                                                                    self.client))
+                print('{}:: ERROR could not connect to btle client {}'.format(self.device_name, self.client))
                 print(e)
                 await self.client.disconnect()
                 self.results_dict['connected'] = False
@@ -412,8 +413,8 @@ class BTSensorTemp():
 
     def check_stop_reading_flag(self):
         """Method to safely stop the reading loop and reset the flag"""
-        if self.stop_reading_flag:
-            self.stop_reading_flag == False
+        if self.stop_reading_flag == True:
+            self.stop_reading_flag = False
             return True
         return False
 
@@ -442,7 +443,7 @@ class BTSensorTemp():
             
         # subscribe to the notifications
         try:
-            await self.client.start_notify(service_num, cb)
+            await self.notify(service_num, cb)     # must use the class method to maintain 'status'
         except Exception as e:
             print('{}:: ERROR with client.start_notify service_num={} callback={}'
                         .format(self.device_name, service_num, cb))
@@ -477,7 +478,7 @@ class BTSensorTemp():
 
             # Unsubscribe from notifications
             try:
-                await self.client.stop_notify(service_num)
+                await self.stop_notify(service_num)
                 await asyncio.sleep(1)
             except Exception as e:
                 print('{}:: ERROR failed in unsubscribe from notify'.format(self.device_name))
@@ -602,7 +603,6 @@ class BTSensorTemp():
             print('Temp:          {}'.format(temp))
 
             # Update the device status dict
-            self.results_dict['status'] = 'Reading'
             self.results_dict['data']['temp_celcius'] = temp   
             self.results_dict['data']['temp_farenheit'] = temp*1.8 +32   
             self.results_dict['data']['timestamp'] = datetime.datetime.now()

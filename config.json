@@ -1,0 +1,13 @@
+{
+    "Device": "athegia-hub-V001",
+    "DevicePlatfrom": "raspberrypi",
+    "HardwareVersion":"",
+    "OSVersion":"",
+    "BTLEHubSoftwareVersion":"",
+    "UISoftwareVersion":"",
+    "FirestoreConfig": {
+        "firestore_cred_token": "athegiamedical-firebase-adminsdk-mxzxo-758a05c94d.json",
+        "firestore_project": "athegiamedical",
+        "firestore_collection": "biometrics"
+    }
+}

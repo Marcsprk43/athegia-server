@@ -67,7 +67,7 @@ class BTSensorWellueSPOX():
         emulation_mode(boolean): run in emulation mode if true
         """
 
-        print('{}:: Initializing instance of BTSensorWellueSPOX'.format(btle_name))
+        print('{}:: Initializing instance of BTSensorWellueSPOX'.format(device_name))
         # First check that required parameters are present
         if (((not btle_name == None) or (not btle_addr == None))
                 and (not device_name == None)
@@ -147,9 +147,9 @@ class BTSensorWellueSPOX():
             self.reset_variables()
             self.state = self.STATE_CONNECTING
             self.stop_reading_flag = False
-            print('{} Entering into connecting state'.format(self.device_name))
+            print('{}:: Started reading cycle...'.format(self.device_name))
         else:
-            print('{} ERROR:: Cannot enter into connecting state - existing state is {}'.format(self.device_name, self.state))
+            print('{}:: Error cannot start reading from state {}'.format(self.device_name, self.state))
 
     def stop_reading(self):
         if self.state == self.STATE_CONNECTING:
@@ -239,6 +239,7 @@ class BTSensorWellueSPOX():
                                                                         self.found_device.address))
             try:                                                          
                 self.client = bleak.BleakClient(self.found_device.address)
+                await asyncio.sleep(0.2)
             except Exception as e:
                 print('{}:: ERROR connecting to bleak.BleakClient-address: {}'.format(self.device_name, 
                                                             self.found_device.addr))
@@ -259,8 +260,7 @@ class BTSensorWellueSPOX():
             try:   
                 await self.client.connect()
             except Exception as e:
-                print('{}:: ERROR could not connect to btle client'.format(self.device_name,
-                                                                    self.client))
+                print('{}:: ERROR could not connect to btle client {}'.format(self.device_name, self.client))
                 print(e)
                 await self.client.disconnect()
                 self.results_dict['connected'] = False
@@ -421,7 +421,7 @@ class BTSensorWellueSPOX():
     def check_stop_reading_flag(self):
         """Method to safely stop the reading loop and reset the flag"""
         if self.stop_reading_flag==True:
-            self.stop_reading_flag == False
+            self.stop_reading_flag = False
             return True
         return False
 
@@ -450,9 +450,9 @@ class BTSensorWellueSPOX():
             
         # subscribe to the notifications
         try:
-            await self.client.start_notify(service_num, cb)
+            await self.notify(service_num, cb)   # must use the class method to maintain 'status'
         except Exception as e:
-            print('{}:: ERROR with client.start_noitify service_num={} callback={}'
+            print('{}:: ERROR with client.start_notify service_num={} callback={}'
                         .format(self.device_name, service_num, cb))
         else:
         
@@ -485,7 +485,7 @@ class BTSensorWellueSPOX():
 
             # Unsubscribe from notifications
             try:
-                await self.client.stop_notify(service_num)
+                await self.stop_notify(service_num)
                 await asyncio.sleep(1)
             except Exception as e:
                 print('{}:: ERROR failed in unsubscribe from notify'.format(self.device_name))
@@ -626,7 +626,6 @@ class BTSensorWellueSPOX():
 
             print('\n')   
             # Update the device status dict
-            self.results_dict['status'] = 'Reading'
             self.results_dict['data']['spo2'] = spo2
             self.results_dict['data']['pulse'] = pulse   
             self.results_dict['data']['timestamp'] = datetime.datetime.now()   

@@ -137,25 +137,51 @@ sensor1_config = {
     'connect_delay' : 7,
     'read_delay' : 10,
     'read_complete_delay' : 17,
-    'disconnect_delay': 19 }
+    'disconnect_delay': 19 ,
+    'data_list':[
+        {'data':{ "spo2": 97, "pulse": 62, "timestamp": 0, "good_readings": 0, "total_readings": 0 }},
+        {'data':{ "spo2": 98, "pulse": 60, "timestamp": 0, "good_readings": 0, "total_readings": 0 }}
+        
+    ]}
 
 sensor2_config = {
     'find_delay' : 20,
     'connect_delay' : 22,
     'read_delay' : 25,
     'read_complete_delay' : 32,
-    'disconnect_delay': 34 }
+    'disconnect_delay': 34 ,
+    'data_list':[
+        {'data':{ "systolic": 80, "diastolic": 120, "pulse": 62, "timestamp": 0, "good_readings": 0, "total_readings": 0 }}
+        
+    ] }
+
+sensor3_config = {
+    'find_delay' : 20,
+    'connect_delay' : 22,
+    'read_delay' : 25,
+    'read_complete_delay' : 32,
+    'disconnect_delay': 34 ,
+    'data_list':[
+        {'data':{ "spo2": 97, "pulse": 62, "timestamp": 0, "good_readings": 0, "total_readings": 0 }},
+        {'data':{ "spo2": 98, "pulse": 60, "timestamp": 0, "good_readings": 0, "total_readings": 0 }},
+        
+    ] }
 
 
-s1 = BTSensorDummy(device_name='VTM 20F', device_id=0,
+s1 = BTSensorDummy(device_name='SPO2', device_id=0,
                                 scanner_instance="fakeScanner", 
                                 emulation_mode=False,
                                 config=sensor1_config)
 
-s2 = BTSensorDummy(device_name='VTM 21F', device_id=1,
-                                scanner_instance=scanner, 
+s2 = BTSensorDummy(device_name='BP', device_id=1,
+                                scanner_instance="fakeScanner", 
                                 emulation_mode=False,
                                 config=sensor2_config)
+
+s2 = BTSensorDummy(device_name='Temp', device_id=2,
+                                scanner_instance="fakeScanner", 
+                                emulation_mode=False,
+                                config=sensor3_config)
 sensor_list = [s1,s2]
 
 device_list = [{'name':'SPO2', 'address':'1223456789'},{'name':'BP', 'address':'aaaaaaaaaaaaaa'}]
