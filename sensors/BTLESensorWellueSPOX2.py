@@ -263,9 +263,11 @@ class BTSensorWellueSPOX():
             print('Using existing client')
 
         # Connect to the bluetooth device
-        if not self.client.is_connected:
+        if not self.client.is_connected():
+            print('{}:: Attempting btle connection'.format(self.device_name))
             try:   
-                await self.client.connect()
+                if not await self.client.connect():
+                    print('{}:: Failed connection attempt'.format(self.device_name))
                 await asyncio.sleep(0.2)
             except Exception as e:
                 print('{}:: ERROR could not connect to btle client {}'.format(self.device_name, self.client))
