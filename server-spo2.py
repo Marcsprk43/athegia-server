@@ -61,7 +61,11 @@ EXIT = 3
                         
 @app.route("/")
 def hello_world():
-    return '<p>Hello, World!</p><p><a href="http://10.0.0.110:5000/get_status">Get Status</a></p><p><a href="http://10.0.0.110:5000/start_scan">Start Scan</a></p><p><a href="http://10.0.0.110:5000/get_data">Get Data</a></p><p><a href="http://10.0.0.110:5000/stop_scan">Stop Scan</a></p>'
+    return ('<p>Hello, World!</p><p><a href="http://10.0.0.110:5000/get_status">Get Status</a></p>'
+                +'<p><a href="http://10.0.0.110:5000/start_scan">Start Scan</a></p>'
+                +'<p><a href="http://10.0.0.110:5000/get_data">Get Data</a></p>'
+                +'<p><a href="http://10.0.0.110:5000/stop_scan">Stop Scan</a></p>'
+                +'<p><a href="http://10.0.0.110:5000/save_results">Save Results</a></p>')
 
 @app.route("/get_status")
 def get_status():
@@ -102,6 +106,79 @@ def get_data():
     
     return json.dumps(return_list, indent=4, default=json_serial)
 
+@app.route("/get_user_info")
+def get_user_info():
+    print('in get_user_info')
+    
+    return json.dumps(user_info, indent=4, default=json_serial)
+
+@app.route("/get_device_info")
+def get_device_info():
+    print('in get_device_info')
+    
+    return json.dumps(config, indent=4, default=json_serial)
+
+@app.route("/save_results")
+def save_results():
+    import firebase_admin
+    from firebase_admin import credentials
+    from firebase_admin import firestore
+
+    import os
+
+
+    print('in save_results')
+
+    # collect the results
+    return_list = []
+    for sensor in sensor_list:
+        return_list.append(sensor.get_results())
+    
+    results_dict = {'results':return_list}
+
+    print('Connecting to firestore')
+    try:
+        # Use the JSON Certificate
+        cred = credentials.Certificate('{}/{}'.format(os.getcwd(),config['FirestoreConfig']['firestore_cred_token']))
+
+        # Use the application default credentials
+        #cred = credentials.ApplicationDefault()
+
+        firebase_admin.initialize_app(cred, {
+        'projectId': config['FirestoreConfig']['firestore_project'],
+        })
+
+        db = firestore.client()
+    except Exception as e:
+        print('ERROR connecting to firestore db')
+        print(e)
+    else:
+
+        def save_fs_document(collection, path, dict):
+            """Function to save a dict to firestore"""
+            try: 
+                tileRef = db.document('{}/{}'.format(collection, path))
+                tileRef.set(dict)
+                
+                return True
+            except Exception as e:
+                print(e)        
+                return e    
+        
+        save_fs_document(config['FirestoreConfig']['firestore_collection'],
+                    '{}/{}/{}'.format(user_info['UserUUID'],'results', datetime.datetime.now()), 
+                    results_dict)
+
+    # clean up and close the firestore app
+    print('Cleaning up the firestore app')
+    try:
+        if firebase_admin.get_app():
+            firebase_admin.delete_app(firebase_admin.get_app())
+    except Exception as e:
+        print('ERROR in cleaning up the firestore app')
+        print(e)
+
+    return 1
 
 @app.route("/terminate")
 def terminate():
@@ -112,6 +189,17 @@ def terminate():
     t.join()
     return "<p>terminating......</p>"
 
+
+# Load the configurations
+import os
+
+# load the device configuration with the firestore information
+with open('{}/config.json'.format(os.getcwd())) as f:
+    config = json.load(f)
+
+# load the user configuration
+with open('{}/user_info.json'.format(os.getcwd())) as f:
+    user_info = json.load(f)
 
 
 
