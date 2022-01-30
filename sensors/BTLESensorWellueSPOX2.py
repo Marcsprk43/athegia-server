@@ -282,7 +282,7 @@ class BTSensorWellueSPOX():
             self.results_dict['connected'] = True
             self.results_dict['finalized'] = False
         
-        return self.client.is_connected
+        return 1
 
 
 
@@ -307,7 +307,6 @@ class BTSensorWellueSPOX():
                 else:                           # a device was found and connected
                     print('{}:: device found and connected'.format(self.device_name))
                     print('{}:: entering READ state.....'.format(self.device_name))
-                    self.reset_variables()
                     self.state = self.STATE_READING  # advance the state
 
             elif self.state == self.STATE_READING:
