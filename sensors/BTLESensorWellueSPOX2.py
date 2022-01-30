@@ -23,8 +23,8 @@ class BTSensorWellueSPOX():
 
     # Global class variables
     scanner_instance = None
-    device_name = None
-    device_addr = None
+    btle_name = None
+    btle_addr = None
     device_service_number = 26   # This is from the reverse engineering
     client = None
     found_device = None
@@ -55,27 +55,31 @@ class BTSensorWellueSPOX():
     results_dict = {}
 
 
-    def __init__(self, device_name=None, device_addr=None, device_id=None,
+    def __init__(self, btle_name=None, btle_addr=None, device_name=None, device_id=None,
                         scanner_instance=None, reading_timeout=20):
         """
         Constructor function that initializes the object variables.
         
         Parameters:
-        device_name(str): the name of the bluetooth device
-        device_addr(str): the bluetooth address or UUID of the bluetooth device
+        btle_name(str): the name of the bluetooth device
+        btle_addr(str): the bluetooth address or UUID of the bluetooth device
         scanner_instance(obj): a pointer to the btle scanner to access the list of devices
         emulation_mode(boolean): run in emulation mode if true
         """
 
-        print('{}:: Initializing instance of BTSensorWellueSPOX'.format(device_name))
+        print('{}:: Initializing instance of BTSensorWellueSPOX'.format(btle_name))
         # First check that required parameters are present
-        if (((not device_name == None) or (not device_addr == None))
+        if (((not btle_name == None) or (not btle_addr == None))
                 and (not device_id == None)
                 and (not scanner_instance == None)):
-            self.device_name = device_name   # set the class variable device name
+            self.btle_name = btle_name   # set the class variable device name
             self.init_ring_buffer(300)       # create the ring buffer for the pleth at 30Hz this is 10 seconds
             self.good_readings = 0           # reset for multiple calls
             self.device_id = device_id
+            if device_name:
+                self.device_name = device_name
+            else:
+                self.device_name = btle_name
             self.scanner_instance = scanner_instance
             self.stop_reading_flag = False   # flag to interrupt the reading cycle
             self.reading_timeout_sec = reading_timeout  # the timeout of the reading cycle
@@ -84,7 +88,12 @@ class BTSensorWellueSPOX():
             self.init_results_dict()
 
         else:
-            print("Error no device name specified")
+            print("{}:: Error no device name specified".format(btle_name))
+            print('btle_name: {}'.format(btle_name))
+            print('btle_addr: {}'.format(btle_addr))
+            print('device_id  : {}'.format(device_id))
+            print('device_name: {}'.format(device_name))
+            print('scanner_instance: {}'.format(scanner_instance))
 
     def reset_variables(self):
         """Method to reset variables and ring buffer"""
@@ -98,7 +107,7 @@ class BTSensorWellueSPOX():
         self.results_dict = {}
         # These are standard across all sensors
         self.results_dict['device_id'] = self.device_id
-        self.results_dict['device_name'] = self.device_name
+        self.results_dict['btle_name'] = self.btle_name
         self.results_dict['status'] = 'Initialized'
         self.results_dict['message'] = ''
         self.results_dict['finalized'] = False
@@ -117,7 +126,7 @@ class BTSensorWellueSPOX():
         status_dict['scanner_instance'] = ('{}'.format(self.scanner_instance) 
                                             if self.scanner_instance
                                             else 'None')
-        status_dict['device_name'] = self.device_name
+        status_dict['btle_name'] = self.btle_name
         status_dict['client'] = 'Connected' if self.client else 'None'
         status_dict['found_device'] = True if self.found_device else False
         status_dict['loop_counter'] = self.loop_counter
@@ -135,14 +144,14 @@ class BTSensorWellueSPOX():
             self.client = None
             self.reset_variables()
             self.state = self.STATE_CONNECTING
-            print('{} Entering into connecting state'.format(self.device_name))
+            print('{} Entering into connecting state'.format(self.btle_name))
         else:
-            print('{} ERROR:: Cannot enter into connecting state - existing state is {}'.format(self.device_name, self.state))
+            print('{} ERROR:: Cannot enter into connecting state - existing state is {}'.format(self.btle_name, self.state))
 
     def stop_reading(self):
         if self.state == self.STATE_CONNECTING:
             self.state = self.STATE_DORMANT
-            print('{} Entering into dormant state - existing state is {}'.format(self.device_name, self.state))
+            print('{} Entering into dormant state - existing state is {}'.format(self.btle_name, self.state))
 
             self.found_device = False
 
@@ -150,7 +159,7 @@ class BTSensorWellueSPOX():
             self.stop_reading_flag = True
 
         else:
-            print('{} ERROR:: Cannot enter into dormant state - existing state is {}'.format(self.device_name, self.state))
+            print('{} ERROR:: Cannot enter into dormant state - existing state is {}'.format(self.btle_name, self.state))
 
     def get_results(self):
         return self.results_dict
@@ -173,18 +182,18 @@ class BTSensorWellueSPOX():
             for device in device_list:
                 if name:
                     if re.search(name,device.name, flags=re.IGNORECASE):
-                        print('{}:: Found device with name: {}'.format(self.device_name, device.name))
+                        print('{}:: Found device with name: {}'.format(self.btle_name, device.name))
                         found_device_list.append(device)
                         # set the status to scanning and send it back to the app
                         self.results_dict['status'] = 'DeviceFound'   
                 else:
                     if re.search(addr,device.address, flags=re.IGNORECASE):
-                        print('{}:: Found device with address: {}'.format(self.device_addr, device.address))
+                        print('{}:: Found device with address: {}'.format(self.btle_addr, device.address))
                         found_device_list.append(device)
                         # set the status to scanning and send it back to the app
                         self.results_dict['status'] = 'DeviceFound'  
         except Exception as e:
-            print('{}:: ERROR in find_device - device_list is probably invalid'.format(self.device_name))                 
+            print('{}:: ERROR in find_device - device_list is probably invalid'.format(self.btle_name))                 
 
         return found_device_list
 
@@ -201,15 +210,15 @@ class BTSensorWellueSPOX():
         # first check to see if the device was previously found
         if not self.found_device:
             device_list = self.scanner_instance.devices
-            if self.device_name:
-                found_device_list = self.find_device(device_list,name=self.device_name) # search for the device
+            if self.btle_name:
+                found_device_list = self.find_device(device_list,name=self.btle_name) # search for the device
             else:
-                found_device_list = self.find_device(device_list,addr=self.device_addr) # search for the device
+                found_device_list = self.find_device(device_list,addr=self.btle_addr) # search for the device
 
             if len(found_device_list) > 0:  # a device was found
-                print("{}:: Bluetooth devices found with name: {}".format(self.device_name,self.device_name))
+                print("{}:: Bluetooth devices found with name: {}".format(self.btle_name,self.btle_name))
                 self.found_device = found_device_list[0] # If there are multiple devices use the first one
-                print('{}:: name: {}  btle address: {}'.format(self.device_name,
+                print('{}:: name: {}  btle address: {}'.format(self.btle_name,
                             self.found_device.name, self.found_device.address))
             else:
                 return False  # no device was found - return
@@ -223,12 +232,12 @@ class BTSensorWellueSPOX():
             # set the status to scanning and send it back to the app
             self.results_dict['status'] = 'Connecting'
 
-            print('{}:: Connecting to device with address: {}'.format(self.device_name, 
+            print('{}:: Connecting to device with address: {}'.format(self.btle_name, 
                                                                         self.found_device.address))
             try:                                                          
                 self.client = bleak.BleakClient(self.found_device.address)
             except Exception as e:
-                print('{}:: ERROR connecting to bleak.BleakClient-address: {}'.format(self.device_name, 
+                print('{}:: ERROR connecting to bleak.BleakClient-address: {}'.format(self.btle_name, 
                                                             self.found_device.addr))
 
                 if self.client:
@@ -247,7 +256,7 @@ class BTSensorWellueSPOX():
             try:   
                 await self.client.connect()
             except Exception as e:
-                print('{}:: ERROR could not connect to btle client'.format(self.device_name,
+                print('{}:: ERROR could not connect to btle client'.format(self.btle_name,
                                                                     self.client))
                 await self.client.disconnect()
                 self.results_dict['connected'] = False
@@ -262,7 +271,7 @@ class BTSensorWellueSPOX():
                 self.results_dict['connected'] = True
                 self.results_dict['completed'] = False
         else:
-            print('{}:: Using existing connection to client'.format(self.device_name))
+            print('{}:: Using existing connection to client'.format(self.btle_name))
             # set the status to connected and send it back to the app
             self.results_dict['status'] = 'Connected'
             self.results_dict['connected'] = True
@@ -291,8 +300,8 @@ class BTSensorWellueSPOX():
                 if not await self.connect():
                     await asyncio.sleep(0.5)    # no device found - back off for 0.5 sec
                 else:                           # a device was found and connected
-                    print('{}:: device found and connected'.format(self.device_name))
-                    print('{}:: entering READ state.....'.format(self.device_name))
+                    print('{}:: device found and connected'.format(self.btle_name))
+                    print('{}:: entering READ state.....'.format(self.btle_name))
                     self.reset_variables()
                     self.state = self.STATE_READING  # advance the state
 
@@ -302,14 +311,14 @@ class BTSensorWellueSPOX():
                                                         callback=None, num_readings=7)
                 self.results_dict['message'] = msg
                 if result == 1:
-                    print('{}:: Successfully completed readings'.format(self.device_name))
+                    print('{}:: Successfully completed readings'.format(self.btle_name))
                     self.state = self.STATE_DORMANT
-                    print('{}:: Transitioning to state: {}'.format(self.device_name, self.state))
+                    print('{}:: Transitioning to state: {}'.format(self.btle_name, self.state))
                 elif result == -1:      # timeout error
-                    print('{}:: Problem with readings: {}'.format(self.device_name, msg))
+                    print('{}:: Problem with readings: {}'.format(self.btle_name, msg))
                     self.state = self.STATE_CONNECTING
                 elif result == -2:      # stop_signal
-                    print('{}:: Problem with readings: {}'.format(self.device_name, msg))
+                    print('{}:: Problem with readings: {}'.format(self.btle_name, msg))
                     self.state = self.STATE_DORMANT
                 
             else:
@@ -324,14 +333,14 @@ class BTSensorWellueSPOX():
         if self.client:
             print('Client exists....')
             if self.client.is_connected:
-                print('{}:: Client is connected....disconecting'.format(self.device_name))
+                print('{}:: Client is connected....disconecting'.format(self.btle_name))
                 while self.client.is_connected:
-                    print('{}:: Disconnecting from btle device'.format(self.device_name))
+                    print('{}:: Disconnecting from btle device'.format(self.btle_name))
                     await self.client.disconnect()
                 # set the status to connected and send it back to the app
                 self.results_dict['status'] = 'Disconnected'
                 self.results_dict['connected'] = False
-                print('{}:: BTLE Client is disconnected'.format(self.device_name))
+                print('{}:: BTLE Client is disconnected'.format(self.btle_name))
                 self.client = None
                 self.found_device = False
                 self.state = self.STATE_DORMANT
@@ -440,7 +449,7 @@ class BTSensorWellueSPOX():
             await self.client.start_notify(service_num, cb)
         except Exception as e:
             print('{}:: ERROR with client.start_noitify service_num={} callback={}'
-                        .format(self.device_name, service_num, cb))
+                        .format(self.btle_name, service_num, cb))
         else:
         
             # set up the timeout trigger
@@ -452,30 +461,30 @@ class BTSensorWellueSPOX():
                     loop_flag = False
                     return_code = 1
                     return_msg = 'Success with {} readings'.format(num_readings)
-                    print('{}:: Successful sensor reading'.format(self.device_name))
+                    print('{}:: Successful sensor reading'.format(self.btle_name))
                 elif datetime.datetime.now() > time_out:
                     loop_flag=False
                     return_msg = 'Timeout'
-                    print('{}:: Timeout in sensor reading'.format(self.device_name))
+                    print('{}:: Timeout in sensor reading'.format(self.btle_name))
                     return_code = -1
                 elif self.check_stop_reading_flag():
                     loop_flag=False
                     return_msg = 'Stop reading signal'
-                    print('{}:: Sensor reading interrupted with stop_reading signal'.format(self.device_name))
+                    print('{}:: Sensor reading interrupted with stop_reading signal'.format(self.btle_name))
                     return_code = -2
                 else:
                     await asyncio.sleep(.5)
-                    print('{}:: mainloop :: sleep cycle - good_readings {}'.format(self.device_name,
+                    print('{}:: mainloop :: sleep cycle - good_readings {}'.format(self.btle_name,
                                                                             self.good_readings ))
             
-            print('{}:: mainloop -stopping notify'.format(self.device_name))
+            print('{}:: mainloop -stopping notify'.format(self.btle_name))
 
             # Unsubscribe from notifications
             try:
                 await self.client.stop_notify(service_num)
                 await asyncio.sleep(1)
             except Exception as e:
-                print('{}:: ERROR failed in unsubscribe from notify'.format(self.device_name))
+                print('{}:: ERROR failed in unsubscribe from notify'.format(self.btle_name))
                 print(e)
 
         if return_code == 1:
@@ -486,11 +495,11 @@ class BTSensorWellueSPOX():
             self.results_dict['finalized'] = False
 
         try:
-            print('{}:: disconnecting from btle client'.format(self.device_name))
+            print('{}:: disconnecting from btle client'.format(self.btle_name))
             await self.disconnect()
             await asyncio.sleep(1)
         except Exception as e:
-                print('{}:: ERROR failed in btle lient disconnect'.format(self.device_name))
+                print('{}:: ERROR failed in btle lient disconnect'.format(self.btle_name))
                 print(e)
         else:
             self.results_dict['connected'] = False

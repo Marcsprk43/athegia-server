@@ -15,7 +15,7 @@ def callback(results_dict):
 
 time.sleep(10)
 print('starting the sensor')
-sensor1 = BTSensorWellueSPOX(device_name='VTM 20F', 
+sensor1 = BTSensorWellueSPOX(btle_name='VTM 20F', device_name='Pulse Oximeter',
                                 scanner_instance=s, 
                                 emulation_mode=False)
 time.sleep(7)

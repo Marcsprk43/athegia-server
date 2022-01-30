@@ -15,7 +15,7 @@ def callback(results_dict):
 
 time.sleep(1)
 print('starting the sensor')
-sensor1 = BTSensorTemp(device_addr='A8:1B:6A:A8:EC:18', device_id=2,
+sensor1 = BTSensorTemp(btle_addr='A8:1B:6A:A8:EC:18', device_name='Thermometer', device_id=2,
                                 scanner_instance=s, 
                                 reading_timeout=60)
 
