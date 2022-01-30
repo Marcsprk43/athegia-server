@@ -144,6 +144,7 @@ class BTSensorWellueSPOX():
             self.client = None
             self.reset_variables()
             self.state = self.STATE_CONNECTING
+            self.stop_reading_flag = False
             print('{} Entering into connecting state'.format(self.btle_name))
         else:
             print('{} ERROR:: Cannot enter into connecting state - existing state is {}'.format(self.btle_name, self.state))
