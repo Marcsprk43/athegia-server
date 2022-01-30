@@ -334,6 +334,7 @@ class BTSensorWellueSPOX():
                 print('{}:: BTLE Client is disconnected'.format(self.device_name))
                 self.client = None
                 self.found_device = False
+                self.state = self.STATE_DORMANT
 
             return self.client.is_connected
         else:
