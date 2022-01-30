@@ -144,6 +144,8 @@ class BTSensorWellueSPOX():
             self.state = self.STATE_DORMANT
             print('{} Entering into dormant state - existing state is {}'.format(self.device_name, self.state))
 
+            self.found_device = False
+
         elif self.state == self.STATE_READING:
             self.stop_reading_flag = True
 
@@ -323,12 +325,15 @@ class BTSensorWellueSPOX():
             print('Client exists....')
             if self.client.is_connected:
                 print('{}:: Client is connected....disconecting'.format(self.device_name))
-                await self.client.disconnect()
+                while self.client.is_connected:
+                    print('{}:: Disconnecting from btle device'.format(self.device_name))
+                    await self.client.disconnect()
                 # set the status to connected and send it back to the app
                 self.results_dict['status'] = 'Disconnected'
                 self.results_dict['connected'] = False
                 print('{}:: BTLE Client is disconnected'.format(self.device_name))
                 self.client = None
+                self.found_device = False
 
             return self.client.is_connected
         else:
