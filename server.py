@@ -96,9 +96,13 @@ s1 = BTSensorWellueSPOX(device_name='VTM 20F', device_id=0,
 s2 = BTSensorLibelliumBP(device_name='BP01', device_id=1,
                                 scanner_instance=scanner)
 
-s3 = BTSensorTemp(device_addr='A8:1B:6A:A8:EC:18', device_id=2,
+s3 = BTSensorTemp(device_name='Thermometer', device_id=2,
                                 scanner_instance=scanner, 
                                 reading_timeout=40)
+
+#s3 = BTSensorTemp(device_addr='A8:1B:6A:A8:EC:18', device_id=2,
+#                                scanner_instance=scanner, 
+#                                reading_timeout=40)
 
 
 sensor_list = [s1, s2, s3]
