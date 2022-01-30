@@ -107,9 +107,9 @@ class BTSensorTemp():
         self.results_dict['connected'] = False
         # These are unique to the sensor
         self.results_dict['data'] = {}
-        self.results_dict['data']['systolic'] = 0
-        self.results_dict['data']['diastolic'] = 0 
-        self.results_dict['data']['pulse'] = 0 
+        self.results_dict['data']['temp_celcius'] = 0
+        self.results_dict['data']['temp_farenheit'] = 0 
+        self.results_dict['data']['timestamp'] = ''
         self.results_dict['data']['good_readings'] = 0
         self.results_dict['data']['total_readings'] = 0
 
