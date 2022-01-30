@@ -359,6 +359,8 @@ class BTSensorWellueSPOX():
             else:
                 await asyncio.sleep(0.5)
 
+            await asyncio.sleep(0.5)
+
    
 
     async def get_services(self):
