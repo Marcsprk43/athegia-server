@@ -52,7 +52,7 @@ class BTSensorWellueSPOX():
     state = STATE_DORMANT  # main state variable - initialize to DORMANT
    
     # this is the results dict that the flask server has access to
-    results_dict = {}
+    #results_dict = {}
 
 
     def __init__(self, btle_name=None, btle_addr=None, device_name=None, device_id=None,
@@ -114,6 +114,7 @@ class BTSensorWellueSPOX():
         self.results_dict['message'] = ''
         self.results_dict['finalized'] = False
         self.results_dict['connected'] = False
+        self.results_dict['TEST_TAG'] = "TEST TAG"
         # These are unique to the sensor
         self.results_dict['data'] = {}
         self.results_dict['data']['spo2'] = 0
@@ -273,13 +274,13 @@ class BTSensorWellueSPOX():
                 # set the status to connected and send it back to the app
                 self.results_dict['status'] = 'Connected'
                 self.results_dict['connected'] = True
-                self.results_dict['completed'] = False
+                self.results_dict['finalized'] = False
         else:
             print('{}:: Using existing connection to client'.format(self.device_name))
             # set the status to connected and send it back to the app
             self.results_dict['status'] = 'Connected'
             self.results_dict['connected'] = True
-            self.results_dict['completed'] = False
+            self.results_dict['finalized'] = False
         
         return self.client.is_connected
 
