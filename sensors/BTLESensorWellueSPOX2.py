@@ -417,7 +417,7 @@ class BTSensorWellueSPOX():
 
     def check_stop_reading_flag(self):
         """Method to safely stop the reading loop and reset the flag"""
-        if self.stop_reading_flag:
+        if self.stop_reading_flag==True:
             self.stop_reading_flag == False
             return True
         return False
