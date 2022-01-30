@@ -238,13 +238,13 @@ class BTSensorTemp():
         if not self.client:
             print('Creating BTLE client....')
 
-            print('{}:: Connecting to device with address: {}'.format(self.device_name, 
+            print('{}:: Creating client device with address: {}'.format(self.device_name, 
                                                                         self.found_device.address))
             try:                                                          
                 self.client = bleak.BleakClient(self.found_device.address)
                 await asyncio.sleep(0.2)
             except Exception as e:
-                print('{}:: ERROR connecting to bleak.BleakClient-address: {}'.format(self.device_name, 
+                print('{}:: ERROR Creating client device with address: {}'.format(self.device_name, 
                                                             self.found_device.addr))
 
                 if self.client:
@@ -262,8 +262,10 @@ class BTSensorTemp():
 
         # Connect to the bluetooth device 
         if not self.client.is_connected:
+            print('{}:: Attempting btle connection'.format(self.device_name))
             try:   
-                await self.client.connect()
+                if not await self.client.connect():
+                    print('{}:: Failed connection attempt'.format(self.device_name))
                 await asyncio.sleep(0.2)
             except Exception as e:
                 print('{}:: ERROR could not connect to btle client {}'.format(self.device_name, self.client))

@@ -240,13 +240,13 @@ class BTSensorWellueSPOX():
         if not self.client:
             print('Creating BTLE client....')
 
-            print('{}:: Connecting to device with address: {}'.format(self.device_name, 
+            print('{}:: Creating client device with address: {}'.format(self.device_name, 
                                                                         self.found_device.address))
             try:                                                          
                 self.client = bleak.BleakClient(self.found_device.address)
                 await asyncio.sleep(0.2)
             except Exception as e:
-                print('{}:: ERROR connecting to bleak.BleakClient-address: {}'.format(self.device_name, 
+                print('{}:: ERROR Creating client device with address: {}'.format(self.device_name, 
                                                             self.found_device.addr))
 
                 if self.client:
