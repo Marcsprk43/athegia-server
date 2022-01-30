@@ -1,3 +1,34 @@
+#####################################################################################
+#######                                                                       #######
+#######                      Bluetooth Hub and server                         #######
+#######                                 by                                    #######
+#######                          Marc van Zyl                                 #######
+#######                                                                       #######
+#####################################################################################
+
+"""Bluetooh hub and server manages the bluetooth connections and exposes and interface
+to read and control the bluetooth devices. The bluetooth hub consists of two 
+components each running in its own thread:
+   1) a bluetooth scanner that contintually scans the environment for advertising
+      bluetooth devices and records a list of the device in a class list that is
+      accessible to the bluetooth sensor objects
+   2) a collection of bluetooth sensor objects that run asynchronously in a single
+      thread. Each sensor object exposes an interface to control the connection
+      to the bluetooth device and to read the status and data from the device.
+      
+The flask server provides the interface to the methods exposed by the bluetooth hub 
+components.
+
+The address of the server is http://127.0.0.1:5000
+
+The following methonds are supported:
+  /get_status
+  /start_scan
+  /stop_scan 
+  /get_data
+  
+The results are returned as JSON objects"""
+
 import sys
 from flask import Flask
 sys.path.append('/home/pi/Documents/src')
