@@ -118,7 +118,7 @@ def get_device_info():
     
     return json.dumps(config, indent=4, default=json_serial)
 
-@app.route("/save_results")
+"""@app.route("/save_results")
 def save_results():
     import firebase_admin
     from firebase_admin import credentials
@@ -155,7 +155,7 @@ def save_results():
     else:
 
         def save_fs_document(collection, path, dict):
-            """Function to save a dict to firestore"""
+            #Function to save a dict to firestore
             try: 
                 tileRef = db.document('{}/{}'.format(collection, path))
                 tileRef.set(dict)
@@ -178,7 +178,7 @@ def save_results():
         print('ERROR in cleaning up the firestore app')
         print(e)
 
-    return 1
+    return 1"""
 
 @app.route("/terminate")
 def terminate():
