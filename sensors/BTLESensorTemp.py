@@ -106,6 +106,7 @@ class BTSensorTemp():
         # These are standard across all sensors
         self.results_dict['device_id'] = self.device_id
         self.results_dict['btle_name'] = self.btle_name
+        self.results_dict['device_name'] = self.device_name
         self.results_dict['status'] = 'Initialized'
         self.results_dict['message'] = ''
         self.results_dict['finalized'] = False
@@ -140,6 +141,7 @@ class BTSensorTemp():
             self.client = None
             self.reset_variables()
             self.state = self.STATE_CONNECTING
+            self.stop_reading_flag = False
             print('{}:: Started reading cycle...'.format(self.btle_name))
         else:
             print('{}:: Error cannot start reading from state {}'.format(self.btle_name, self.state))

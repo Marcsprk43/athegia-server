@@ -108,6 +108,7 @@ class BTSensorWellueSPOX():
         # These are standard across all sensors
         self.results_dict['device_id'] = self.device_id
         self.results_dict['btle_name'] = self.btle_name
+        self.results_dict['device_name'] = self.device_name
         self.results_dict['status'] = 'Initialized'
         self.results_dict['message'] = ''
         self.results_dict['finalized'] = False
