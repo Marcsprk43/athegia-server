@@ -1,0 +1,27 @@
+To access the raspberry pi over ssh:
+
+# ssh pi@10.0.0.110  
+
+
+To download the most recent code
+
+# cd ~/Documents/athegia-server
+# git pull 
+
+
+To run the server:
+
+main server with all three sensors active:
+# python server.py
+
+test server isolating spo2 sensor:
+# python server-spo2.py 
+
+test server isolating Temp sensor:
+# python server-temp.py 
+
+test server isolating blood pressure sensor:
+# python server-bp.py 
+
+
+
