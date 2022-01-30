@@ -102,7 +102,7 @@ def get_device_list():
 
 #asyncio.gather(s1.loop(), s2.loop())
 async def async_collection():
-    await asyncio.gather(s1.loop(), s2.loop(), s3.loop())
+    await asyncio.gather(s1.loop())
 
 def run_function():
     asyncio.run(async_collection())
