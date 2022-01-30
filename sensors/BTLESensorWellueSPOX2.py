@@ -50,9 +50,7 @@ class BTSensorWellueSPOX():
 
     # This is the main loop state variable
     state = STATE_DORMANT  # main state variable - initialize to DORMANT
-   
-    # this is the results dict that the flask server has access to
-    #results_dict = {}
+
 
 
     def __init__(self, btle_name=None, btle_addr=None, device_name=None, device_id=None,
@@ -74,17 +72,16 @@ class BTSensorWellueSPOX():
                 and (not device_id == None)
                 and (not scanner_instance == None)):
             self.btle_name = btle_name   # set the class variable device name
-            self.init_ring_buffer(300)       # create the ring buffer for the pleth at 30Hz this is 10 seconds
-            self.good_readings = 0           # reset for multiple calls
-            self.device_id = device_id
+            self.btle_addr = btle_addr   # set the class variable device name
             if device_name:
                 self.device_name = device_name
             else:
                 self.device_name = btle_name
+            self.device_id = device_id
+            self.good_readings = 0           # reset for multiple calls
             self.scanner_instance = scanner_instance
             self.stop_reading_flag = False   # flag to interrupt the reading cycle
             self.reading_timeout_sec = reading_timeout  # the timeout of the reading cycle
-
             # set the status to initialized and send it back to the app
             self.init_results_dict()
 
@@ -114,7 +111,6 @@ class BTSensorWellueSPOX():
         self.results_dict['message'] = ''
         self.results_dict['finalized'] = False
         self.results_dict['connected'] = False
-        self.results_dict['TEST_TAG'] = "TEST TAG"
         # These are unique to the sensor
         self.results_dict['data'] = {}
         self.results_dict['data']['spo2'] = 0
@@ -145,7 +141,7 @@ class BTSensorWellueSPOX():
     def start_reading(self):
         if self.state == self.STATE_DORMANT:
             self.client = None
-            self.reset_variables()
+            self.reset_variables() 
             self.state = self.STATE_CONNECTING
             self.stop_reading_flag = False
             print('{}:: Started reading cycle...'.format(self.device_name))

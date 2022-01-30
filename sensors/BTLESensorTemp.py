@@ -50,9 +50,6 @@ class BTSensorTemp():
 
     # This is the main loop state variable
     state = STATE_DORMANT  # main state variable - initialize to DORMANT
-   
-    # this is the results dict that the flask server has access to
-    results_dict = {}
 
 
     def __init__(self, btle_name=None, btle_addr=None, device_name=None, device_id=None,
@@ -255,6 +252,7 @@ class BTSensorTemp():
         if not self.client.is_connected:
             try:   
                 await self.client.connect()
+                await asyncio.sleep(0.2)
             except Exception as e:
                 print('{}:: ERROR could not connect to btle client {}'.format(self.device_name, self.client))
                 print(e)
@@ -263,21 +261,20 @@ class BTSensorTemp():
                 await asyncio.sleep(1)
                 self.client = False
                 return False
-
-            if self.client.is_connected:
+            else:
                 print('{}:: Successfully connected to btle client'.format(self.device_name))
                 # set the status to connected and send it back to the app
                 self.results_dict['status'] = 'Connected'
                 self.results_dict['connected'] = True
-                self.results_dict['completed'] = False
+                self.results_dict['finalized'] = False
         else:
             print('{}:: Using existing connection to client'.format(self.device_name))
             # set the status to connected and send it back to the app
             self.results_dict['status'] = 'Connected'
             self.results_dict['connected'] = True
-            self.results_dict['completed'] = False
+            self.results_dict['finalized'] = False
         
-        return self.client.is_connected
+        return 1
 
 
     async def loop(self, initial_state=STATE_DORMANT):
