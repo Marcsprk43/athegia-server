@@ -91,7 +91,7 @@ t_scanner.start()
 print('Started scanning Thread.............')
 
 
-s3 = BTSensorTemp(btle_addr='A8:1B:6A:A8:EC:18', device_name='Thermometer', device_id=2,
+s3 = BTSensorTemp(btle_addr='A8:1B:6A:A8:EC:18', device_name='Temp', device_id=2,
                                 scanner_instance=scanner, 
                                 reading_timeout=40)
 

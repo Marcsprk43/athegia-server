@@ -91,7 +91,7 @@ t_scanner.start()
 print('Started scanning Thread.............')
 
 
-s2 = BTSensorLibelliumBP(btle_name='BP01', device_name='Blood Pressure', device_id=1,
+s2 = BTSensorLibelliumBP(btle_name='BP01', device_name='BP', device_id=1,
                                 scanner_instance=scanner)
 
 

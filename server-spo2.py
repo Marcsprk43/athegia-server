@@ -90,7 +90,7 @@ t_scanner = Thread(target=scanner.scan, args=())
 t_scanner.start()
 print('Started scanning Thread.............')
 
-s1 = BTSensorWellueSPOX(btle_name='VTM 20F', device_name='Pulse Oximeter', device_id=0,
+s1 = BTSensorWellueSPOX(btle_name='VTM 20F', device_name='SPO2', device_id=0,
                                 scanner_instance=scanner)
 
 
