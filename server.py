@@ -57,8 +57,8 @@ def start_scan():
 @app.route("/stop_scan")
 def stop_scan():
     print('stopping ')
-    s1.stop_reading()
-    s2.stop_reading()
+    for sensor in sensor_list:
+        sensor.stop_reading()
 
     return "<p>stopping......</p>"
 
@@ -75,8 +75,8 @@ def get_data():
 @app.route("/terminate")
 def terminate():
     print('in terminate')
-    s1.terminate()
-    s2.terminate()
+    for sensor in sensor_list:
+        sensor.terminate()
 
     t.join()
     return "<p>terminating......</p>"
