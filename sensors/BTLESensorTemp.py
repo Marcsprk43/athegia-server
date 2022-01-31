@@ -481,7 +481,7 @@ class BTSensorTemp():
                     print('{}:: Sensor reading interrupted with stop_reading signal'.format(self.device_name))
                     return_code = -2
                 else:
-                    await asyncio.sleep(.5)
+                    await asyncio.sleep(1.0)
                     print('{}:: mainloop :: sleep cycle - good_readings {}'.format(self.device_name,
                                                                             self.good_readings ))
             
