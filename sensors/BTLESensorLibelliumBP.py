@@ -269,15 +269,18 @@ class BTSensorLibelliumBP():
         if not self.client.is_connected:
             print('{}:: Attempting btle connection'.format(self.device_name))
             try:   
+                await asyncio.sleep(0.5)
                 if not await self.client.connect():
                     print('{}:: Failed connection attempt'.format(self.device_name))
-                await asyncio.sleep(0.2)
+                
             except Exception as e:
                 print('{}:: ERROR could not connect to btle client {}'.format(self.device_name, self.client))
                 print(e)
                 self.failed_connect += 1
-                await self.disconnect()
                 await asyncio.sleep(1)
+                await self.disconnect()
+                self.client = None
+                self.found_device = None
                 return False
             else:
                 print('{}:: Successfully connected to btle client'.format(self.device_name))
@@ -485,7 +488,7 @@ class BTSensorLibelliumBP():
                     print('{}:: Sensor reading interrupted with stop_reading signal'.format(self.device_name))
                     return_code = -2
                 else:
-                    await asyncio.sleep(.5)
+                    await asyncio.sleep(1.0)
                     print('{}:: mainloop :: sleep cycle - good_readings {}'.format(self.device_name,
                                                                             self.good_readings ))
             
