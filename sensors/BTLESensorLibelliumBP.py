@@ -461,8 +461,6 @@ class BTSensorLibelliumBP():
         try:
             await self.client.write_gatt_char(self.characterisitc_UUID, bytearray([0x65]))  # initialize 
             await asyncio.sleep(1)
-            await self.client.write_gatt_char(self.characterisitc_UUID, bytearray([0x65]))  # initialize 
-            await asyncio.sleep(1)
             await self.notify(self.characterisitc_UUID, cb)    # must use the class method to maintain 'status'
         except Exception as e:
             print('{}:: ERROR with client.start_notify service_num={} callback={}'
