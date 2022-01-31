@@ -231,6 +231,8 @@ class BTSensorLibelliumBP():
                 print('{}:: name: {}  btle address: {}'.format(self.device_name,
                             self.found_device.name, self.found_device.address))
             else:
+                await asyncio.sleep(1)
+
                 return False  # no device was found - return
         else:
             print('Device already registered')
