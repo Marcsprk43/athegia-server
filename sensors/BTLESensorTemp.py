@@ -123,7 +123,7 @@ class BTSensorTemp():
         status_dict['scanner_instance'] = ('{}'.format(self.scanner_instance) 
                                             if self.scanner_instance
                                             else 'None')
-        status_dict['btle_name'] = self.btle_name
+        status_dict['btle_name'] = self.device_name
         status_dict['client'] = 'Connected' if self.client else 'None'
         status_dict['found_device'] = True if self.found_device else False
         status_dict['loop_counter'] = self.loop_counter

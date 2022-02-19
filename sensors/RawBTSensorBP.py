@@ -156,7 +156,9 @@ class BTSensorBP():
             cb = self.callback
         else:
             cb = callback
-        
+        # initialize and send the command to start the pressure 
+        await self.client.write_gatt_char('0000ffe1-0000-1000-8000-00805f9b34fb', bytearray([0x65]))  # initialize 
+        await asyncio.sleep(.1)
         await self.client.write_gatt_char('0000ffe1-0000-1000-8000-00805f9b34fb', bytearray([0x65]))  # initialize 
         await asyncio.sleep(.1)
         await self.client.start_notify('0000ffe1-0000-1000-8000-00805f9b34fb', cb)
