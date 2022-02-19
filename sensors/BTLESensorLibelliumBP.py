@@ -632,4 +632,6 @@ class BTSensorLibelliumBP():
             self.results_dict['data']['good_readings'] = self.good_readings
             self.results_dict['data']['total_readings'] = self.number_readings
                                     
-
+    def async_run_function(self):
+        asyncio.run(self.loop())
+        print("started asycnc_run_function")

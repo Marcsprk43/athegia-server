@@ -219,7 +219,7 @@ s3 = BTSensorTemp(btle_addr='A8:1B:6A:A8:EC:18', device_name='Temp', device_id=2
                                 reading_timeout=40)
 
 
-sensor_list = [s1]
+sensor_list = [s1,s2,s3]
 
 
 def get_device_list():
@@ -235,6 +235,12 @@ def get_device_list():
 #asyncio.run(async_collection())
 t_s1 = Thread(target=s1.async_run_function, args =())
 t_s1.start()
+
+t_s2 = Thread(target=s2.async_run_function, args =())
+t_s2.start()
+
+t_s2 = Thread(target=s2.async_run_function, args =())
+t_s2.start()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001)
