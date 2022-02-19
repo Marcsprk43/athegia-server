@@ -622,6 +622,6 @@ class BTSensorTemp():
                                     
     def async_run_function(self):
         asyncio.run(self.loop())
-        print("started asycnc_run_function")
+        print("started asycnc_run_function in temp")
 
 

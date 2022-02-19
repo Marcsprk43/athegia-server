@@ -239,8 +239,8 @@ t_s1.start()
 t_s2 = Thread(target=s2.async_run_function, args =())
 t_s2.start()
 
-t_s2 = Thread(target=s2.async_run_function, args =())
-t_s2.start()
+t_s3 = Thread(target=s3.async_run_function, args =())
+t_s3.start()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001)
