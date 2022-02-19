@@ -460,6 +460,7 @@ class BTSensorLibelliumBP():
         # subscribe to the notifications
         try:
             print('{}:: Double tap of BP sensor'.format(self.device_name))
+            await asyncio.sleep(1)
             await self.client.write_gatt_char(self.characterisitc_UUID, bytearray([0x65]))  # initialize 
             await asyncio.sleep(1)
             await self.client.write_gatt_char(self.characterisitc_UUID, bytearray([0x65]))  # initialize 
