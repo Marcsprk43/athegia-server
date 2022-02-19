@@ -31,6 +31,7 @@ The results are returned as JSON objects"""
 
 import sys
 from flask import Flask
+from flask_cors import CORS
 sys.path.append('/home/pi/Documents/src')
 from btlescanner import BTLEScanner
 import asyncio
@@ -43,7 +44,7 @@ from sensors.BTLESensorLibelliumBP import BTSensorLibelliumBP
 from sensors.BTLESensorTemp import BTSensorTemp
 
 app = Flask(__name__)
-
+CORS(app)
 
 def json_serial(obj):
     """JSON serializer for objects not serializable by default json code"""
