@@ -219,23 +219,23 @@ s3 = BTSensorTemp(btle_addr='A8:1B:6A:A8:EC:18', device_name='Temp', device_id=2
                                 reading_timeout=40)
 
 
-sensor_list = [s1, s2, s3]
+sensor_list = [s1]
 
 
 def get_device_list():
     return sensor_list
 
 #asyncio.gather(s1.loop(), s2.loop())
-async def async_collection():
-    await asyncio.gather(s1.loop(), s2.loop(), s3.loop())
+#async def async_collection():
+#    await asyncio.gather(s1.loop(), s2.loop(), s3.loop())
 
-def run_function():
-    asyncio.run(async_collection())
+#def run_function():
+#    asyncio.run(async_collection())
 
 #asyncio.run(async_collection())
-t = Thread(target=run_function, args =())
-t.start()
+t_s1 = Thread(target=s1.async_run_function, args =())
+t_s1.start()
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
-    print('serving on port 5000')
+    app.run(host='0.0.0.0', port=5001)
+    print('serving on port 5001')

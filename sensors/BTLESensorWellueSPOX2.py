@@ -656,3 +656,6 @@ class BTSensorWellueSPOX():
 
             self.results_dict['data']['total_pleth_readings'] = total_pleth_readings
           
+    def async_run_function(self):
+        asyncio.run(self.loop())
+        print("started asycnc_run_function")
