@@ -222,6 +222,11 @@ s3 = BTSensorTemp(btle_addr='A8:1B:6A:A8:EC:18', device_name='Temp', device_id=2
 
 sensor_list = [s1, s2, s3]
 
+# this is the event loop that will be run in the thread
+def start_background_thread_loop(loop):
+    asyncio.set_event_loop(loop)
+    loop.run_forever()
+
 
 def get_device_list():
     return sensor_list
@@ -230,12 +235,21 @@ def get_device_list():
 async def async_collection():
     await asyncio.gather(s1.loop(), s2.loop(), s3.loop())
 
-def run_function():
-    asyncio.run(async_collection())
+
+async def launch_all_loops(sensors) -> None:
+    """Fetch all urls from the list of urls
+    It is done concurrently and combined into a single coroutine"""
+    tasks = [asyncio.create_task(sensor.loop()) for sensor in sensors]
+    results = await asyncio.gather(*tasks)
+
 
 #asyncio.run(async_collection())
-t = Thread(target=run_function, args =())
+loop = asyncio.new_event_loop()
+
+t = Thread(target=start_background_thread_loop, args =(loop,))
 t.start()
+
+asyncio.run_coroutine_threadsafe(launch_all_loops(sensor_list), loop)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
