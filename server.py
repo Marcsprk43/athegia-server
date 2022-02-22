@@ -246,10 +246,14 @@ async def launch_all_loops(sensors) -> None:
 #asyncio.run(async_collection())
 loop = asyncio.new_event_loop()
 
+print('Creating thread....................')
 t = Thread(target=start_background_thread_loop, args =(loop,))
+print('Starting thread....................')
 t.start()
-
+print('Loading loops in to thread.........')
 asyncio.run_coroutine_threadsafe(launch_all_loops(sensor_list), loop)
+
+print('Running main function...............')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
