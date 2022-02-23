@@ -216,6 +216,7 @@ class BTSensorTemp():
                 self.found_device = None
             self.failed_connect = 0
 
+
         # first check to see if the device was previously found
         if not self.found_device:
             device_list = self.scanner_instance.devices
@@ -269,6 +270,7 @@ class BTSensorTemp():
                 await asyncio.sleep(0.5)
                 if not await self.client.connect():
                     print('{}:: Failed connection attempt'.format(self.device_name))  
+                await asyncio.sleep(0.5)                
             except Exception as e:
                 print('{}:: ERROR could not connect to btle client {}'.format(self.device_name, self.client))
                 print(e)
@@ -310,7 +312,7 @@ class BTSensorTemp():
                 self.results_dict['connected'] = False
                 print('{}:: BTLE Client is disconnected'.format(self.device_name))
                 self.client = None
-                self.found_device = False
+                self.found_device = None
                 self.state = self.STATE_DORMANT
 
             return False
@@ -329,7 +331,7 @@ class BTSensorTemp():
 
             # Idle
             if self.state == self.STATE_DORMANT:
-                await asyncio.sleep(0.5)  # sleep for 0.5 and hand back to event loop
+                await asyncio.sleep(2)  # sleep for 1.5 and hand back to event loop
 
             elif self.state == self.STATE_CONNECTING:
 
@@ -337,6 +339,8 @@ class BTSensorTemp():
                     print('{}:: device found and connected'.format(self.device_name))
                     print('{}:: entering READ state.....'.format(self.device_name))
                     self.state = self.STATE_READING  # advance the state
+                else:
+                    await asyncio.sleep(.5)
 
             elif self.state == self.STATE_READING:
 
