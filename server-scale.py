@@ -1,6 +1,6 @@
 #####################################################################################
 #######                                                                       #######
-#######            Test Bluetooth Hub and server for the SPO2 sensor          #######
+#######           Test Bluetooth Hub and server for the scale sensor          #######
 #######                                 by                                    #######
 #######                          Marc van Zyl                                 #######
 #######                                                                       #######
@@ -31,6 +31,7 @@ The results are returned as JSON objects"""
 
 import sys
 from flask import Flask
+from sensors.BTLESensorBuererScale import BTSensorBuererScale
 sys.path.append('/home/pi/Documents/src')
 from btlescanner import BTLEScanner
 import asyncio
@@ -209,7 +210,7 @@ t_scanner = Thread(target=scanner.scan, args=())
 t_scanner.start()
 print('Started scanning Thread.............')
 
-s1 = BTSensorWellueSPOX(btle_name='VTM 20F', device_name='SPO2', device_id=0,
+s1 = BTSensorBuererScale(btle_name='BF70', device_name='SCL', device_id=0,
                                 scanner_instance=scanner)
 
 
