@@ -14,7 +14,7 @@ import numpy as np
 import datetime
 
         
-class BTSensorWellueSPOX():
+class BTSensorBuererScale():
     """
     Class to manage the full connection to a bluetooth device using the bleak library.
     """
@@ -113,8 +113,9 @@ class BTSensorWellueSPOX():
         self.results_dict['connected'] = False
         # These are unique to the sensor
         self.results_dict['data'] = {}
-        self.results_dict['data']['spo2'] = 0
-        self.results_dict['data']['pulse'] = 0 
+        self.results_dict['data']['weight_kg'] = 0
+        self.results_dict['data']['weight_lbs'] = 0 
+        self.results_dict['data']['bmi'] = 0 
         self.results_dict['data']['timestamp'] = 0        
         self.results_dict['data']['good_readings'] = 0
         self.results_dict['data']['total_readings'] = 0
