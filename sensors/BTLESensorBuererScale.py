@@ -294,9 +294,10 @@ class BTSensorBuererScale():
             self.results_dict['connected'] = True
             self.results_dict['finalized'] = False
         
+        print("getting services")
         self.get_services()
         self.print_services()
-        
+
         return 1
 
     async def disconnect(self):
