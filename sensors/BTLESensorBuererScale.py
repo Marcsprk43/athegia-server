@@ -295,7 +295,7 @@ class BTSensorBuererScale():
             self.results_dict['finalized'] = False
         
         print("getting services")
-        self.get_services()
+        await self.get_services()
         self.print_services()
 
         return 1
