@@ -204,7 +204,7 @@ with open('{}/user_info.json'.format(os.getcwd())) as f:
 
 
 
-scanner = BTLEScanner(service_name='bt_scan', uiCallback=None, emulation_mode=False)
+scanner = BTLEScanner(service_name='bt_scan', uiCallback=None, emulation_mode=False, verbose=True)
 
 t_scanner = Thread(target=scanner.scan, args=())
 t_scanner.start()
