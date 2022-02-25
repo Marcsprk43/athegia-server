@@ -601,59 +601,36 @@ class BTSensorBuererScale():
         time_stamp = np.datetime64(datetime.datetime.now(),'ms')
 
         # first check what kind of message this is 
-        if (data[0] == 0xfe) and (data[1] == 0x0a):   # This is a SPO2 and pulse rate message
 
-            spox_results_dict = {}
-            self.number_readings += 1 #increment the reading counter
-            print('{} - '.format(sender, data), end='')
+        # <alt sb 6> 00 20
+        if ((data[0] == 0xe6) or (data[0] == 0xf6)) and (data[1] == 0x00):   # This acknowledgement
+            print('Received Init ack - ({})'.format(data))
 
-            self.data_list.append(data)   # append the data on list (for averages later)
+        # <sb> 58 <status> <weight>    
+        elif ((data[0] == 0xe7) or (data[0] == 0xf7)) and (data[1] == 0x58):   # This a weight reading
+            print('Received Weight reading - ({}) - '.format(data))
 
-            # This section decodes the data from hexadecimal into decimal and binary and prints
-            # the values to the console
-            int_data = []
-            # print the simple hex string
-            for b in data:
-                int_data.append(b)
-                print('{:02x}:'.format(b), end='')
-           
-            print()
-            # print the hex, decimal and binary values of each byte
-            for b in data:
-                print('{}({})[{:b}] '.format(hex(b), b, b), end='')
-            
-            # save the latest pulse and spo2 values to variables
-            pulse = int(data[4])
-            spo2 = int(data[5])
+            # implement good readings here
+            #self.number_readings += 1 #increment the reading counter
+            # if readings good
+            #    self.good_readings += 1
 
-           
-            print('#### Pulse: {}  SPO2: {}'.format(pulse,spo2))
-
-
-            # simple tests to ensure the readings are "good"
-            if pulse > 20 and pulse <110:
-                if spo2 > 50 and spo2 <=100:
-                    self.good_readings += 1
-                    print('\nGood readings: {} ({})'.format(self.good_readings, self.number_readings))
-
-            print('\n')   
+            # save the values to the class variables
             # Update the device status dict
-            self.results_dict['data']['spo2'] = spo2
-            self.results_dict['data']['pulse'] = pulse   
-            self.results_dict['data']['timestamp'] = datetime.datetime.now()   
-            self.results_dict['data']['good_readings'] = self.good_readings
-            self.results_dict['data']['total_readings'] = self.number_readings
-        
-            return self.good_readings
+            #self.results_dict['data']['spo2'] = spo2
+            #self.results_dict['data']['pulse'] = pulse   
+            #self.results_dict['data']['timestamp'] = datetime.datetime.now()   
+            #self.results_dict['data']['good_readings'] = self.good_readings
+            #self.results_dict['data']['total_readings'] = self.number_readings
 
-           
-            
-        elif  (data[0] == 0xfe) and ((data[1] == 0x08) or (data[1] == 0x09)):  # this is a pleth message
-            # parse the message            
-            pleth = float(data[3])
-            
-            # add to ring buffer
-            total_pleth_readings = self.add_to_ring_buffer(time_stamp, pleth)
 
-            self.results_dict['data']['total_pleth_readings'] = total_pleth_readings
-          
+        # have no idea what message this is
+        else:
+            print('#'*30)
+            print('Unknown notification recieved - {}'.format(data))
+            hex_list = ['0x{:02X}'.format(int(byte)) for byte in data]
+            int_list = ['{:03d}'.format(int(byte)) for byte in data]
+            print('Hex:', '\t'.join(hex_list))
+            print('Dec:','\t'.join(int_list))
+            print('#'*30)
+
