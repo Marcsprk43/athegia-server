@@ -616,7 +616,8 @@ class BTSensorBuererScale():
         # <sb> 58 <status> <weight>    
         elif ((data[0] == 0xe7) or (data[0] == 0xf7)) and (data[1] == 0x58):   # This a weight reading
             print('Received Weight reading - ({}) - '.format(data))
-
+            self.print_bytes(data)
+            
             # implement good readings here
             #self.number_readings += 1 #increment the reading counter
             # if readings good
@@ -641,3 +642,9 @@ class BTSensorBuererScale():
             print('Dec:','\t'.join(int_list))
             print('#'*30)
 
+    def print_bytes(self, data):
+        if len(data) > 0:
+            hex_list = ['0x{:02X}'.format(int(byte)) for byte in data]
+            int_list = ['{:03d}'.format(int(byte)) for byte in data]
+            print('Hex:', '\t'.join(hex_list))
+            print('Dec:','\t'.join(int_list))
