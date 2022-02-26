@@ -25,7 +25,7 @@ class BTSensorBuererScale():
     scanner_instance = None
     btle_name = None
     btle_addr = None
-    device_service_number = 53   # This is from the reverse engineering
+    device_service_number = 45   # This is from the reverse engineering
     client = None
     found_device = None
     services = None
