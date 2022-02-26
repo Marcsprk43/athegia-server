@@ -419,6 +419,9 @@ class BTSensorBuererScale():
             cb = callback
         await self.client.start_notify(service_num, cb)
 
+        # intialize the scale
+        await self.client.write_gatt_char(service_num, bytearray(b'\xe6\x00\x20'))
+
         # set the status to connected and send it back to the app
         self.results_dict['status'] = 'Reading'
 
