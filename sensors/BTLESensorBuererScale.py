@@ -294,9 +294,9 @@ class BTSensorBuererScale():
             self.results_dict['connected'] = True
             self.results_dict['finalized'] = False
         
-        print("getting services")
-        await self.get_services()
-        self.print_services()
+        #print("getting services")
+        #await self.get_services()
+        #self.print_services()
 
         return 1
 
@@ -351,7 +351,7 @@ class BTSensorBuererScale():
             elif self.state == self.STATE_READING:
 
                 result, msg = await self.get_readings(self.device_service_number, 
-                                                        callback=None, num_readings=7)
+                                                        callback=None, num_readings=1)
                 self.results_dict['message'] = msg
                 if result == 1:
                     print('{}:: Successfully completed readings'.format(self.device_name))
@@ -614,22 +614,24 @@ class BTSensorBuererScale():
             print('Received Init ack - ({})'.format(data))
 
         # <sb> 58 <status> <weight>    
-        elif ((data[0] == 0xe7) or (data[0] == 0xf7)) and (data[1] == 0x58):   # This a weight reading
+        elif ((data[0] == 0xe7) or (data[0] == 0xf7)) and (data[1] == 0x58) :# and len(data) == 5:   # This a weight reading
             print('Received Weight reading - ({}) - '.format(data))
             self.print_bytes(data)
-            
-            # implement good readings here
-            #self.number_readings += 1 #increment the reading counter
-            # if readings good
-            #    self.good_readings += 1
 
-            # save the values to the class variables
+            # implement good readings here
+            self.number_readings += 1 #increment the reading counter
+
+            if data[2] == 0:   # the readings have stablized
+                self.good_readings += 1
+
             # Update the device status dict
-            #self.results_dict['data']['spo2'] = spo2
-            #self.results_dict['data']['pulse'] = pulse   
-            #self.results_dict['data']['timestamp'] = datetime.datetime.now()   
-            #self.results_dict['data']['good_readings'] = self.good_readings
-            #self.results_dict['data']['total_readings'] = self.number_readings
+            weight_kg = (data[3]*256 + data[4])*0.05    # the Buerer scale units is 50gr per unit
+            self.results_dict['data']['weight_kg'] = weight_kg
+            self.results_dict['data']['weight_lbs'] = weight_kg*2.2
+            self.results_dict['data']['bmi'] = 0.0  
+            self.results_dict['data']['timestamp'] = datetime.datetime.now()   
+            self.results_dict['data']['good_readings'] = self.good_readings
+            self.results_dict['data']['total_readings'] = self.number_readings
 
 
         # have no idea what message this is
