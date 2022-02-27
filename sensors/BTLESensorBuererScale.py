@@ -84,8 +84,8 @@ class BTSensorBuererScale():
             self.stop_reading_flag = False   # flag to interrupt the reading cycle
             self.reading_timeout_sec = reading_timeout  # the timeout of the reading cycle
             # set the status to initialized and send it back to the app
+            
             self.init_results_dict()
-            self.callback_params = {}
 
         else:
             print("{}:: Error no device name specified".format(btle_name))
@@ -121,6 +121,8 @@ class BTSensorBuererScale():
         self.results_dict['data']['timestamp'] = 0        
         self.results_dict['data']['good_readings'] = 0
         self.results_dict['data']['total_readings'] = 0
+        
+        self.callback_params = {}
 
         self.callback_params['finalized1'] = False
         self.callback_params['finalized2'] = False
