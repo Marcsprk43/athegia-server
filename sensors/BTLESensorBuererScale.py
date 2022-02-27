@@ -122,6 +122,9 @@ class BTSensorBuererScale():
         self.results_dict['data']['good_readings'] = 0
         self.results_dict['data']['total_readings'] = 0
 
+        self.callback_params['finalized1'] = False
+        self.callback_params['finalized2'] = False
+
 
     def get_status(self):
         status_dict = {}
