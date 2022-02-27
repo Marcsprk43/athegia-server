@@ -29,6 +29,7 @@ The following methonds are supported:
   
 The results are returned as JSON objects"""
 
+from socket import timeout
 import sys
 from flask import Flask
 from sensors.BTLESensorBuererScale import BTSensorBuererScale
@@ -211,7 +212,7 @@ t_scanner.start()
 print('Started scanning Thread.............')
 
 s1 = BTSensorBuererScale(btle_name='BF70', device_name='SCL', device_id=0,
-                                scanner_instance=scanner)
+                                scanner_instance=scanner, reading_timeout=30)
 
 
 sensor_list = [s1]

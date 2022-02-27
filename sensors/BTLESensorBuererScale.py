@@ -12,6 +12,7 @@ import bleak
 import re
 import numpy as np
 import datetime
+import time
 
         
 class BTSensorBuererScale():
@@ -54,7 +55,7 @@ class BTSensorBuererScale():
 
 
     def __init__(self, btle_name=None, btle_addr=None, device_name=None, device_id=None,
-                        scanner_instance=None, reading_timeout=20):
+                        scanner_instance=None, reading_timeout=30):
         """
         Constructor function that initializes the object variables.
         
@@ -84,6 +85,7 @@ class BTSensorBuererScale():
             self.reading_timeout_sec = reading_timeout  # the timeout of the reading cycle
             # set the status to initialized and send it back to the app
             self.init_results_dict()
+            self.callback_params = {}
 
         else:
             print("{}:: Error no device name specified".format(btle_name))
@@ -419,8 +421,10 @@ class BTSensorBuererScale():
             cb = callback
         await self.client.start_notify(service_num, cb)
 
+        await asyncio.sleep(.1)  # short pause
+
         # intialize the scale
-        await self.client.write_gatt_char(service_num, bytearray(b'\xe6\x00\x20'))
+        await self.client.write_gatt_char(service_num, bytearray(b'\xe6\x01'))
 
         # set the status to connected and send it back to the app
         self.results_dict['status'] = 'Reading'
@@ -469,7 +473,17 @@ class BTSensorBuererScale():
             
         # subscribe to the notifications
         try:
+            
+            #Start notify
             await self.notify(service_num, cb)   # must use the class method to maintain 'status'
+
+            await asyncio.sleep(.1)
+
+            #Give timestamp
+            await self.client.write_gatt_char(45, bytearray(b'\xe9') + int(time.time()).to_bytes(4, 'big'))
+
+            await asyncio.sleep(.1)
+
         except Exception as e:
             print('{}:: ERROR with client.start_notify service_num={} callback={}'
                         .format(self.device_name, service_num, cb))
@@ -479,6 +493,7 @@ class BTSensorBuererScale():
             time_out = datetime.datetime.now() + datetime.timedelta(0,self.reading_timeout_sec)
             loop_flag = True
 
+            # primary reading loop
             while loop_flag:
                 if self.good_readings >= num_readings:
                     loop_flag = False
@@ -500,6 +515,18 @@ class BTSensorBuererScale():
                     print('{}:: mainloop :: sleep cycle - good_readings {}'.format(self.device_name,
                                                                             self.good_readings ))
             
+            # secondary loop to wait for scale to give the final readings
+            # (if this is not done then the scale will not process the disconnect signal)
+            count = 0
+            while (not self.callback_params['finalized2']) and (count < 20):
+                print("callback_params['finalized2'] = {} ({})".format(callback_params['finalized2'], count))
+                await asyncio.sleep(0.3)
+                count += 1
+
+            await asyncio.sleep(4)
+
+
+
             print('{}:: mainloop -stopping notify'.format(self.device_name))
 
             # Unsubscribe from notifications
@@ -519,8 +546,13 @@ class BTSensorBuererScale():
 
         try:
             print('{}:: disconnecting from btle client'.format(self.device_name))
-            await self.disconnect()
-            await asyncio.sleep(1)
+
+            await self.force_disconnect(verbose=True) # tell the client to disconnect
+            await asyncio.sleep(.1)
+            await self.disconnect()         # disconnect bleak client 
+            await asyncio.sleep(.1)
+            self.results_dict['status'] = 'Completed'
+
         except Exception as e:
                 print('{}:: ERROR failed in btle lient disconnect'.format(self.device_name))
                 print(e)
@@ -592,6 +624,7 @@ class BTSensorBuererScale():
                 self.buff_value[(index+self.buff_size - max_rows):(index+self.buff_size)])
         
 
+
     def default_callback(self, sender, data:bytearray ):  
         """
         The default callback function for the device. The callback function is passed a bytearray with the
@@ -605,48 +638,139 @@ class BTSensorBuererScale():
         Returns:
         good_readings(int): the number of good readings received
         """
+        
         time_stamp = np.datetime64(datetime.datetime.now(),'ms')
 
-        # first check what kind of message this is 
+        #Initalization notification
+        if ((data[0] == 0xe6) or (data[0] == 0xf6))  and data[1] == 0x00:
+            print("BF70::Successful Initalization  {}".format(data))
+        #Confirm Scale units
+        elif ((data[0] == 0xe7) or (data[0] == 0xf7)) and data[1] == 0xf0 and data[2] == 0x4d:
+            print("BF70::Changed units: {}".format(data))
+        #Get scale parameters
+        elif ((data[0] == 0xe7) or (data[0] == 0xf7)) and data[1] == 0xf0 and data[2] == 0x4f:
+            # set the flag to stop querying parameters
+            self.callback_params['parameters_received'] = True
+            print("""BF70::Parameters: battery: {} 
+                \n\t wthr: {} 
+                \n\t fthr: {} 
+                \n\t unit: {} 
+                \n\t user: {} 
+                \n\t user rw: {} 
+                \n\t user m: {}""".format(int(data[4]), int(data[5]), int(data[6]), 
+                                            int(data[7]), int(data[8]), int(data[9]), int(data[10])))
+        # user list BF70::(45) - e7:f0:33:00:01:08:
+        elif ((data[0] == 0xe7) or (data[0] == 0xf7)) and data[1] == 0xf0 and data[2] == 0x33:
+            print("BF70 User list: count:{} max:{}".format(data[4], data[5]),
+                ':'.join(['{:02x}'.format(byte) for byte in data]))
+        
+        # readings BF70::(45) - e7:58:01:07:70
+        elif ((data[0] == 0xe7) or (data[0] == 0xf7)) and data[1] == 0x58:  
 
-        # <alt sb 6> 00 20
-        if ((data[0] == 0xe6) or (data[0] == 0xf6)) and (data[1] == 0x00):   # This acknowledgement
-            print('Received Init ack - ({})'.format(data))
+            self.number_readings += 1 
 
-        # <sb> 58 <status> <weight>    
-        elif ((data[0] == 0xe7) or (data[0] == 0xf7)) and (data[1] == 0x58) :# and len(data) == 5:   # This a weight reading
-            print('Received Weight reading - ({}) - '.format(data))
-            self.print_bytes(data)
-
-            # implement good readings here
-            self.number_readings += 1 #increment the reading counter
-
-            if data[2] == 0:   # the readings have stablized
+            weight_kg = (data[3]*256+data[4])*0.05
+            weight_lbs = weight_kg*2.2
+            status = data[2]
+            print("BF70::Weight reading: status:{} kg:{:.1f} lbs:{:.1f}".format(status, weight_kg, weight_lbs),
+                ':'.join(['{:02x}'.format(byte) for byte in data]))
+            if status == 0:
+                print("BF70::Weight reading Finalized")
+                self.callback_params['finalized1'] = True
                 self.good_readings += 1
-
-            # Update the device status dict
+            
+            
             weight_kg = (data[3]*256 + data[4])*0.05    # the Buerer scale units is 50gr per unit
             self.results_dict['data']['weight_kg'] = weight_kg
-            self.results_dict['data']['weight_lbs'] = weight_kg*2.2
+            self.results_dict['data']['weight_lbs'] = weight_lbs
             self.results_dict['data']['bmi'] = 0.0  
             self.results_dict['data']['timestamp'] = datetime.datetime.now()   
             self.results_dict['data']['good_readings'] = self.good_readings
             self.results_dict['data']['total_readings'] = self.number_readings
 
 
-        # have no idea what message this is
-        else:
-            print('#'*30)
-            print('Unknown notification recieved - {}'.format(data))
-            hex_list = ['0x{:02X}'.format(int(byte)) for byte in data]
-            int_list = ['{:03d}'.format(int(byte)) for byte in data]
-            print('Hex:', '\t'.join(hex_list))
-            print('Dec:','\t'.join(int_list))
-            print('#'*30)
+        # readings completed  BF70::(45) - e7:59:03:01:00:00:00:00:00:00:00:00:00:
+        elif ((data[0] == 0xe7) or (data[0] == 0xf7)) and data[1] == 0x59:  
+            print('BF70::Readings completed.............')
+            self.callback_params['finalized2'] = True
 
-    def print_bytes(self, data):
-        if len(data) > 0:
-            hex_list = ['0x{:02X}'.format(int(byte)) for byte in data]
-            int_list = ['{:03d}'.format(int(byte)) for byte in data]
-            print('Hex:', '\t'.join(hex_list))
-            print('Dec:','\t'.join(int_list))
+
+        # have no idea what message this is print out all the bytes
+        else:
+            print('BF70::({}) - '.format(sender), ':'.join(['{:02x}'.format(b) for b in data]))
+            int_data = []
+            # print out hex(dec)[binary] of each byte
+            print(' '.join(['{:02x}({})[{:08b}] '.format(b, b, b) for b in data]))
+
+
+
+    ##########################################################################################
+    # various scale functions
+    ##########################################################################################
+
+    async def get_user_list(self, verbose=False):
+        data = bytearray(b'\xe7\x33')
+        await self.client.write_gatt_char(45, data)
+        if verbose: 
+            print('Get user list - write_gatt_char ({})'
+                .format(':'.join(['{:02x}'.format(byte) for byte in data])))
+            
+    async def get_user(self, count=None, user_num=None, verbose=False):
+        # Write: <sb> f1 34 <count> <current>
+        data = bytearray(b'\xe7\xf1\x34') + bytearray([count]) + bytearray([user_num])
+        await self.client.write_gatt_char(45, data)
+        if verbose: 
+            print('Get user - write_gatt_char ({})'
+                .format(':'.join(['{:02x}'.format(byte) for byte in data])))
+            
+            
+    async def delete_user(self, uuid=None, verbose=False):
+        # Write: <sb> f1 34 <count> <current>
+        data = bytearray(b'\xe7\x32') + uuid
+        await self.client.write_gatt_char(45, data)
+        if verbose: 
+            print('Delete user - write_gatt_char ({})'
+                .format(':'.join(['{:02x}'.format(byte) for byte in data])))
+            
+
+    async def delete_saved_measurements(self, uuid=None, verbose=False):
+        # Write: <sb> f1 34 <count> <current>
+        data = bytearray(b'\xe7\x43') + uuid
+        await self.client.write_gatt_char(45, data)
+        if verbose: 
+            print('Delete user measurements - write_gatt_char ({})'
+                .format(':'.join(['{:02x}'.format(byte) for byte in data])))
+            
+
+    async def get_scale_parameters(self, callback_params=None, verbose=False):
+        data = bytearray(b'\xe7\x4f\x00\x00\x00\x00\x00\x00\x00\x00')
+        callback_params['parameters_received'] = False
+        count = 0
+        while (not callback_params['parameters_received']) and count<10:
+            await self.client.write_gatt_char(45, data)
+            count += 1
+            if verbose: 
+                print('Get scale params - write_gatt_char ({})'
+                    .format(':'.join(['{:02x}'.format(byte) for byte in data])))
+            await asyncio.sleep(0.5)
+
+            
+    async def perform_measurement(self, verbose=False):
+        # Write: <sb> f1 34 <count> <current>
+        data = bytearray(b'\xe7\x40\x00\x00\x00\x00\x00\x00\x00\x00')
+        await self.client.write_gatt_char(45, data)
+        if verbose: 
+            print('Perfom measurement - write_gatt_char ({})'
+                .format(':'.join(['{:02x}'.format(byte) for byte in data])))
+
+    async def force_disconnect(self, verbose=False):
+        # Write: <alt sb a> 02
+        data = bytearray(b'\xea\x02')
+        await self.client.write_gatt_char(45, data)
+        if verbose: 
+            print('FORCE DISCONNECT - write_gatt_char ({})'
+                .format(':'.join(['{:02x}'.format(byte) for byte in data])))
+
+
+
+
