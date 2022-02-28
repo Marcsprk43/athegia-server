@@ -529,11 +529,10 @@ class BTSensorBuererScale():
             # (if this is not done then the scale will not process the disconnect signal)
             count = 0
             while (not self.callback_params['finalized2']) and (count < 20):
-                print("callback_params['finalized2'] = {} ({})".format(self.callback_params['finalized2'], count))
                 await asyncio.sleep(0.3)
                 count += 1
 
-            await asyncio.sleep(4)
+            await asyncio.sleep(2)
 
 
 

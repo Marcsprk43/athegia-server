@@ -153,7 +153,7 @@ class BTLEScanner():
 
             # Unpack the Bleak.devices object into a list of Bleak.device
             if devices:
-                print('scanner:: Device Log - {} devices found'.format(len(devices)))
+                #print('scanner:: Device Log - {} devices found'.format(len(devices)))
                 for d in devices:
                     if self.verbose:
                         print(d, d.rssi)   # print the RSSI to the console for fun
@@ -166,13 +166,13 @@ class BTLEScanner():
                 self.devices = []
                 self.found_devices = False
 
-            print("{}::End scan for bluetooth devices".format(self.service_name))
+            #print("{}::End scan for bluetooth devices".format(self.service_name))
             # set the status to scanning and send it back to the app
             if (not self.uiCallback == None):
                 self.ui_callback_dict[self.service_name]['status'] = 'Scanning....'
                 self.uiCallback(self.ui_callback_dict)
 
-            print("{}:: Sleeping".format(self.service_name))
+            #print("{}:: Sleeping".format(self.service_name))
             time.sleep(2)
 
         return 1
