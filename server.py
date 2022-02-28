@@ -119,12 +119,7 @@ def get_device_info():
 
 @app.route("/save_results")
 def save_results():
-    import firebase_admin
-    from firebase_admin import credentials
-    from firebase_admin import firestore
-
-    import os
-
+    import requests
 
     print('in save_results')
 
@@ -133,50 +128,15 @@ def save_results():
     for sensor in sensor_list:
         return_list.append(sensor.get_results())
     
-    results_dict = {'results':return_list}
+    results_dict = {'data':return_list}
 
-    print('Connecting to firestore')
-    try:
-        # Use the JSON Certificate
-        cred = credentials.Certificate('{}/{}'.format(os.getcwd(),config['FirestoreConfig']['firestore_cred_token']))
 
-        # Use the application default credentials
-        #cred = credentials.ApplicationDefault()
+    url = 'https://us-central1-athegiamedical.cloudfunctions.net/save_biometrics_to_firestore'
+    headers = {'Content-type': 'application/json'}
+    x = requests.post(url, headers=headers, json=results_dict)
 
-        firebase_admin.initialize_app(cred, {
-        'projectId': config['FirestoreConfig']['firestore_project'],
-        })
-
-        db = firestore.client()
-    except Exception as e:
-        print('ERROR connecting to firestore db')
-        print(e)
-    else:
-
-        def save_fs_document(collection, path, dict):
-            """Function to save a dict to firestore"""
-            try: 
-                tileRef = db.document('{}/{}'.format(collection, path))
-                tileRef.set(dict)
-                
-                return True
-            except Exception as e:
-                print(e)        
-                return e    
+    print(x.text)
         
-        save_fs_document(config['FirestoreConfig']['firestore_collection'],
-                    '{}/{}/{}'.format(user_info['UserUUID'],'results', datetime.datetime.now()), 
-                    results_dict)
-
-    # clean up and close the firestore app
-    print('Cleaning up the firestore app')
-    try:
-        if firebase_admin.get_app():
-            firebase_admin.delete_app(firebase_admin.get_app())
-    except Exception as e:
-        print('ERROR in cleaning up the firestore app')
-        print(e)
-
     return 1
 
 
