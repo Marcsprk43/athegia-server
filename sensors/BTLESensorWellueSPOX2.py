@@ -221,7 +221,7 @@ class BTSensorWellueSPOX():
         # first check to see if the device was previously found
         if not self.found_device:
             device_list = self.scanner_instance.devices
-            print('{}:: Searching for device'.format(self.device_name))
+            #print('{}:: Searching for device'.format(self.device_name))
             if self.btle_name:
                 found_device_list = self.find_device(device_list,name=self.btle_name) # search for the device
             else:
