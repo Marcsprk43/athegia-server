@@ -128,16 +128,23 @@ def save_results():
     for sensor in sensor_list:
         return_list.append(sensor.get_results())
     
-    results_dict = {'data':return_list}
+    patient_uuid = user_info['UserUUID']
+    record_timestamp = '{}'.format(datetime.datetime.now())
+    results_dict = {'data':{}}
+    results_dict['data']['payload'] = {'results':return_list}
+    results_dict['data']['patient_uuid'] = patient_uuid
+    results_dict['data']['timestamp'] = record_timestamp
+
+    print(json.dumps(results_dict, indent=4, default=json_serial))
 
 
     url = 'https://us-central1-athegiamedical.cloudfunctions.net/save_biometrics_to_firestore'
     headers = {'Content-type': 'application/json'}
-    x = requests.post(url, headers=headers, json=results_dict)
+    x = requests.post(url, headers=headers, data=json.dumps(results_dict, default=json_serial))
 
     print(x.text)
         
-    return 1
+    return x.text
 
 
 
@@ -204,5 +211,5 @@ t = Thread(target=run_function, args =())
 t.start()
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5001)
     print('serving on port 5000')
