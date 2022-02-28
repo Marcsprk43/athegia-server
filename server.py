@@ -32,6 +32,8 @@ The results are returned as JSON objects"""
 import sys
 from flask import Flask
 from flask_cors import CORS
+
+from sensors.BTLESensorBuererScale import BTSensorBuererScale
 sys.path.append('/home/pi/Documents/src')
 from btlescanner import BTLEScanner
 import asyncio
@@ -219,8 +221,12 @@ s3 = BTSensorTemp(btle_addr='A8:1B:6A:A8:EC:18', device_name='Temp', device_id=2
                                 scanner_instance=scanner, 
                                 reading_timeout=40)
 
+s4 = BTSensorBuererScale(btle_name='BF70', device_name='Scale', device_id=3,
+                                scanner_instance=scanner, 
+                                reading_timeout=40)
 
-sensor_list = [s1, s2, s3]
+
+sensor_list = [s1, s2, s3, s4]
 
 
 def get_device_list():
@@ -228,7 +234,7 @@ def get_device_list():
 
 #asyncio.gather(s1.loop(), s2.loop())
 async def async_collection():
-    await asyncio.gather(s1.loop(), s2.loop(), s3.loop())
+    await asyncio.gather(s1.loop(), s2.loop(), s3.loop(),  s4.loop())
 
 def run_function():
     asyncio.run(async_collection())
