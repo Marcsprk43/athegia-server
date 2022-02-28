@@ -216,7 +216,7 @@ class BTSensorBuererScale():
         """
 
         # there must be a connection issue reset and restart
-        if self.failed_connect > 3:
+        if self.failed_connect > 10:
             print('{}:: Failed connect - resetting and restarting'.format(self.device_name))
             if self.client.is_connected:
                 await self.client.disconnect()
@@ -496,7 +496,7 @@ class BTSensorBuererScale():
 
             # the scale can be dormant
             while not self.callback_params['readings_notification_received']:
-                asyncio.sleep(0.5)
+                await asyncio.sleep(0.5)
                 print('{}:: Waiting for first readings........'.format(self.device_name))
         
             # set up the timeout trigger
