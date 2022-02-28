@@ -126,7 +126,7 @@ class BTSensorBuererScale():
 
         self.callback_params['finalized1'] = False
         self.callback_params['finalized2'] = False
-
+        self.callback_params['readings_notification_received'] = False
 
     def get_status(self):
         status_dict = {}
@@ -493,6 +493,11 @@ class BTSensorBuererScale():
             print('{}:: ERROR with client.start_notify service_num={} callback={}'
                         .format(self.device_name, service_num, cb))
         else:
+
+            # the scale can be dormant
+            while not self.callback_params['readings_notification_received']:
+                asyncio.sleep(0.5)
+                print('{}:: Waiting for first readings........'.format(self.device_name))
         
             # set up the timeout trigger
             time_out = datetime.datetime.now() + datetime.timedelta(0,self.reading_timeout_sec)
@@ -671,7 +676,7 @@ class BTSensorBuererScale():
         
         # readings BF70::(45) - e7:58:01:07:70
         elif ((data[0] == 0xe7) or (data[0] == 0xf7)) and data[1] == 0x58:  
-
+            self.callback_params['readings_notification_received'] = True
             self.number_readings += 1 
 
             weight_kg = (data[3]*256+data[4])*0.05
