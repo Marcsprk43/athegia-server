@@ -161,13 +161,13 @@ def terminate():
 
 # Load the configurations
 import os
-
+directory = "/home/pi/Documents/athegia-serv"
 # load the device configuration with the firestore information
-with open('{}/config.json'.format(os.getcwd())) as f:
+with open('{}/config.json'.format(directory)) as f:
     config = json.load(f)
 
 # load the user configuration
-with open('{}/user_info.json'.format(os.getcwd())) as f:
+with open('{}/user_info.json'.format(directory)) as f:
     user_info = json.load(f)
 
 
@@ -188,12 +188,12 @@ s3 = BTSensorTemp(btle_addr='A8:1B:6A:A8:EC:18', device_name='Temp', device_id=2
                                 scanner_instance=scanner, 
                                 reading_timeout=40)
 
-s4 = BTSensorBuererScale(btle_name='BF70', device_name='Scale', device_id=3,
-                                scanner_instance=scanner, 
-                                reading_timeout=40)
+# s4 = BTSensorBuererScale(btle_name='BF70', device_name='Scale', device_id=3,
+#                                scanner_instance=scanner, 
+#                                reading_timeout=40)
 
 
-sensor_list = [s1, s2, s3, s4]
+sensor_list = [s1, s2, s3]
 
 
 def get_device_list():
@@ -201,7 +201,7 @@ def get_device_list():
 
 #asyncio.gather(s1.loop(), s2.loop())
 async def async_collection():
-    await asyncio.gather(s1.loop(), s2.loop(), s3.loop(),  s4.loop())
+    await asyncio.gather(s1.loop(), s2.loop(), s3.loop())
 
 def run_function():
     asyncio.run(async_collection())
